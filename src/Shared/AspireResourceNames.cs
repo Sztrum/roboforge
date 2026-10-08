@@ -1,6 +1,6 @@
 namespace RoboForge.Shared;
 
-public static class Services
+public static class AspireResourceNames
 {
     /// <summary>
     /// The name of the Web API service.

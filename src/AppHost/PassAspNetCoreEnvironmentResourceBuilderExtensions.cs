@@ -1,6 +1,6 @@
 namespace RoboForge.AppHost;
 
-internal static class AspireExtensions
+internal static class PassAspNetCoreEnvironmentResourceBuilderExtensions
 {
     public static IResourceBuilder<T> WithAspNetCoreEnvironment<T>(this IResourceBuilder<T> builder)
         where T : IResourceWithEnvironment

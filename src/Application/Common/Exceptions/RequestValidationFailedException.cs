@@ -1,16 +1,16 @@
-﻿using FluentValidation.Results;
+using FluentValidation.Results;
 
 namespace RoboForge.Application.Common.Exceptions;
 
-public class ValidationException : Exception
+public class RequestValidationFailedException : Exception
 {
-    public ValidationException()
+    public RequestValidationFailedException()
         : base("One or more validation failures have occurred.")
     {
         Errors = new Dictionary<string, string[]>();
     }
 
-    public ValidationException(IEnumerable<ValidationFailure> failures)
+    public RequestValidationFailedException(IEnumerable<ValidationFailure> failures)
         : this()
     {
         Errors = failures

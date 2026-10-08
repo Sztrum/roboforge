@@ -1,4 +1,4 @@
-[assembly: AssemblyFixture(typeof(FunctionalTestFixture))]
+[assembly: AssemblyFixture(typeof(ApiWithPostgresAssemblyFixture))]
 
 namespace RoboForge.Application.FunctionalTests.Infrastructure;
 
@@ -6,10 +6,10 @@ namespace RoboForge.Application.FunctionalTests.Infrastructure;
 /// Starts PostgreSQL through the test Aspire app host and the Web API against it,
 /// once for the whole test assembly.
 /// </summary>
-public sealed class FunctionalTestFixture : IAsyncLifetime
+public sealed class ApiWithPostgresAssemblyFixture : IAsyncLifetime
 {
     private DistributedApplication? _app;
-    private WebApiFactory? _factory;
+    private ApiWithTestDatabaseWebApplicationFactory? _factory;
 
     public HttpClient CreateClient() => _factory!.CreateClient();
 
@@ -28,11 +28,11 @@ public sealed class FunctionalTestFixture : IAsyncLifetime
 
         _app = await builder.BuildAsync(cancellationToken);
         await _app.StartAsync(cancellationToken);
-        await _app.ResourceNotifications.WaitForResourceHealthyAsync(Services.Database, cancellationToken);
+        await _app.ResourceNotifications.WaitForResourceHealthyAsync(AspireResourceNames.Database, cancellationToken);
 
-        var connectionString = (await _app.GetConnectionStringAsync(Services.Database, cancellationToken))!;
+        var connectionString = (await _app.GetConnectionStringAsync(AspireResourceNames.Database, cancellationToken))!;
 
-        _factory = new WebApiFactory(connectionString);
+        _factory = new ApiWithTestDatabaseWebApplicationFactory(connectionString);
     }
 
     public async ValueTask DisposeAsync()

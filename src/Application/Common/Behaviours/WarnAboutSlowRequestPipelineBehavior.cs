@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace RoboForge.Application.Common.Behaviours;
 
-public sealed partial class PerformanceBehaviour<TMessage, TResponse>(ILogger<PerformanceBehaviour<TMessage, TResponse>> logger)
+public sealed partial class WarnAboutSlowRequestPipelineBehavior<TMessage, TResponse>(ILogger<WarnAboutSlowRequestPipelineBehavior<TMessage, TResponse>> logger)
     : IPipelineBehavior<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {

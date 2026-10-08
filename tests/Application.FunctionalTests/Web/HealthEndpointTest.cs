@@ -2,7 +2,7 @@ using System.Net;
 
 namespace RoboForge.Application.FunctionalTests.Web;
 
-public class HealthTests(FunctionalTestFixture fixture)
+public class HealthEndpointTest(ApiWithPostgresAssemblyFixture fixture)
 {
     [Fact]
     public async Task Health_WhenDatabaseIsUp_ReturnsHealthy()

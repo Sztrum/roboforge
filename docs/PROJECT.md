@@ -39,27 +39,32 @@ part inventory, invoices, e-mail notifications (an event log entry instead).
 - **Sales** — what the customer configured and ordered.
 - **Production** — what happens in the workshop.
 
-Each has its own model: the same robot is an `Order` in Sales and a
-`ProductionJob` in Production. Sales and Production do not know each other's
+Each has its own model: the same robot is an `OrderAggregate` in Sales and a
+`ProductionJobAggregate` in Production. Sales and Production do not know each other's
 classes; they are connected only by events.
 
 ## Domain model
 
 | Context | Element | Kind | Key methods / fields |
 | --- | --- | --- | --- |
-| Catalog | `Part` | Aggregate | `Create(...)`, `ChangePrice(Money)`, `Discontinue()` |
-| Catalog | `PartCategory` | Enum | Housing, Drive, Electronics, Sensor |
+| Catalog | `PartAggregate` | Aggregate | `Create(...)`, `ChangePrice(Money)`, `Discontinue()` |
+| Catalog | `PartCategoryEnum` | Enum | Housing, Drive, Electronics, Sensor |
 | Catalog | `TechSpec` | Value object | `MountType`, `Voltage`, `MaxLoadGrams`, `WeightGrams` |
-| Sales | `RobotConfiguration` | Aggregate | `AddPart(PartSnapshot)`, `RemovePart(PartId)`, `Validate()`, `Finalize()` |
+| Sales | `RobotConfigurationAggregate` | Aggregate | `AddPart(PartSnapshot)`, `RemovePart(PartId)`, `Validate()`, `Finalize()` |
 | Sales | `PartSnapshot` | Value object | copy of price and spec at the time the part was added |
-| Sales | `Order` | Aggregate | `Place(configuration)`, `Confirm()`, `Cancel(reason)`, `MarkStageReached(stage)` |
-| Sales | `OrderStatus` | Enum | Draft, Placed, Confirmed, InProduction, Shipped, Cancelled |
-| Production | `ProductionJob` | Aggregate | `Start()`, `CompleteStage(stage, by)`, `FailQa(reason)`, `Ship(trackingNo)` |
-| Production | `ProductionStage` | Enum | Printing, Assembly, QaTests, Packing, Shipped |
+| Sales | `OrderAggregate` | Aggregate | `Place(configuration)`, `Confirm()`, `Cancel(reason)`, `MarkStageReached(stage)` |
+| Sales | `OrderStatusEnum` | Enum | Draft, Placed, Confirmed, InProduction, Shipped, Cancelled |
+| Production | `ProductionJobAggregate` | Aggregate | `Start()`, `CompleteStage(stage, by)`, `FailQa(reason)`, `Ship(trackingNo)` |
+| Production | `ProductionStageEnum` | Enum | Printing, Assembly, QaTests, Packing, Shipped |
 | Shared | `Money` | Value object | `Amount`, `Currency`, operators `+` and `*` |
 | Shared | `LeadTime` | Value object | working days, `Combine(...)` |
 
-Key decision: `Order` stores a **snapshot** of parts, not a catalog
+Names follow the naming rules (descriptive names with role suffixes, as in
+the MDD configurator project). Business-rule violations are separate
+exceptions named after the situation, derived from `DomainException`, e.g.
+`OrderCannotBeCancelledInProductionException` (R8).
+
+Key decision: `OrderAggregate` stores a **snapshot** of parts, not a catalog
 reference. A catalog price change does not change a placed order's price.
 
 ## Business rules
@@ -69,18 +74,18 @@ Numbers are examples and may be changed (record the change here).
 
 | # | Rule | Lives in |
 | --- | --- | --- |
-| R1 | A configuration has exactly 1 housing, 1 drive, 1 electronics and 0–3 sensors. | `RobotConfiguration.Validate()` |
-| R2 | The drive must match the housing's `MountType`. | `CompatibilityPolicy` |
-| R3 | Electronics voltage must match the drive voltage. | `CompatibilityPolicy` |
-| R4 | Total part weight must not exceed the drive's `MaxLoadGrams`. | `CompatibilityPolicy` |
-| R5 | Price = sum of part prices + 15% assembly. Orders from 1000 PLN get 5% off. | `PricingPolicy` |
+| R1 | A configuration has exactly 1 housing, 1 drive, 1 electronics and 0–3 sensors. | `RobotConfigurationAggregate.Validate()` |
+| R2 | The drive must match the housing's `MountType`. | `RobotPartsCompatibilityPolicy` |
+| R3 | Electronics voltage must match the drive voltage. | `RobotPartsCompatibilityPolicy` |
+| R4 | Total part weight must not exceed the drive's `MaxLoadGrams`. | `RobotPartsCompatibilityPolicy` |
+| R5 | Price = sum of part prices + 15% assembly. Orders from 1000 PLN get 5% off. | `RobotConfigurationPricingPolicy` |
 | R6 | Lead time = longest part lead time + 2 days assembly + 1 day QA. | `LeadTime.Combine(...)` |
-| R7 | A discontinued part cannot be added to a new configuration. | `RobotConfiguration.AddPart()` |
-| R8 | An order can be cancelled only before production starts. | `Order.Cancel()` |
-| R9 | Production stages run strictly in order, no skipping. | `ProductionJob.CompleteStage()` |
-| R10 | Failed QA sends the job back to Assembly; after 2 failures the job is on hold pending a decision. | `ProductionJob.FailQa()` |
+| R7 | A discontinued part cannot be added to a new configuration. | `RobotConfigurationAggregate.AddPart()` |
+| R8 | An order can be cancelled only before production starts. | `OrderAggregate.Cancel()` |
+| R9 | Production stages run strictly in order, no skipping. | `ProductionJobAggregate.CompleteStage()` |
+| R10 | Failed QA sends the job back to Assembly; after 2 failures the job is on hold pending a decision. | `ProductionJobAggregate.FailQa()` |
 
-R2–R4 span several parts, so they live in the `CompatibilityPolicy` domain
+R2–R4 span several parts, so they live in the `RobotPartsCompatibilityPolicy` domain
 service, which returns a list of violations instead of throwing on the first
 one — the customer sees all problems at once.
 
@@ -91,12 +96,12 @@ the same transaction as the state change.
 
 | Event | Published by | Handled by | Effect |
 | --- | --- | --- | --- |
-| `OrderConfirmed` | Sales | Production | creates a `ProductionJob` with the part list |
-| `OrderCancelled` | Sales | (log) | log entry (e-mail in the future) |
-| `ProductionStageCompleted` | Production | Sales | `Order.MarkStageReached(stage)`, status `InProduction` |
-| `QaFailed` | Production | Sales | order note, new lead time |
-| `RobotShipped` | Production | Sales | status `Shipped`, tracking number |
-| `PartDiscontinued` | Catalog | Sales | marks draft configurations with this part as invalid |
+| `OrderConfirmedEvent` | Sales | Production | creates a `ProductionJobAggregate` with the part list |
+| `OrderCancelledEvent` | Sales | (log) | log entry (e-mail in the future) |
+| `ProductionStageCompletedEvent` | Production | Sales | `OrderAggregate.MarkStageReached(stage)`, status `InProduction` |
+| `QaFailedEvent` | Production | Sales | order note, new lead time |
+| `RobotShippedEvent` | Production | Sales | status `Shipped`, tracking number |
+| `PartDiscontinuedEvent` | Catalog | Sales | marks draft configurations with this part as invalid |
 
 Mechanics:
 
@@ -158,14 +163,14 @@ awaiting the user's review. Do not start the next stage without approval.
 1. **Skeleton** — solution from the template, Aspire + PostgreSQL,
    `Directory.Build.props`, analyzers, GitHub Actions CI, first architecture
    test.
-2. **Catalog** — `Part` aggregate, `Money` and `TechSpec` value objects,
+2. **Catalog** — `PartAggregate`, `Money` and `TechSpec` value objects,
    commands, seed with ~12 parts.
-3. **Configurator** — `RobotConfiguration`, `CompatibilityPolicy` (R1–R4, R7),
-   `PricingPolicy` (R5), `LeadTime` (R6), `/quote` endpoint, tests for each
+3. **Configurator** — `RobotConfigurationAggregate`, `RobotPartsCompatibilityPolicy`
+   (R1–R4, R7), `RobotConfigurationPricingPolicy` (R5), `LeadTime` (R6), `/quote` endpoint, tests for each
    rule.
-4. **Orders** — `Order` with part snapshots, confirm and cancel (R8), domain
+4. **Orders** — `OrderAggregate` with part snapshots, confirm and cancel (R8), domain
    events + outbox.
-5. **Production** — `ProductionJob` created from `OrderConfirmed`, stages
+5. **Production** — `ProductionJobAggregate` created from `OrderConfirmedEvent`, stages
    (R9), failed QA (R10), events back to Sales.
 6. **Demo polish** — README with diagram, demo seed data, `.http` scenario
    file, optional simple Blazor frontend.
@@ -177,7 +182,7 @@ awaiting the user's review. Do not start the next stage without approval.
    with R2 and R4.
 3. Fix the configuration, get a quote with discount and lead time.
 4. Place and confirm the order; show the trace in Aspire: request → outbox →
-   event → new `ProductionJob`.
+   event → new `ProductionJobAggregate`.
 5. Take the job through the stages, once with failed QA; the order status
    updates itself.
 6. Try to cancel an order in production → refused.

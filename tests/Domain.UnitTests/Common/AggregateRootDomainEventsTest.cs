@@ -2,7 +2,7 @@ using RoboForge.Domain.Common;
 
 namespace RoboForge.Domain.UnitTests.Common;
 
-public class AggregateRootTests
+public class AggregateRootDomainEventsTest
 {
     [Fact]
     public void BusinessMethod_WhenCalled_CollectsDomainEvent()

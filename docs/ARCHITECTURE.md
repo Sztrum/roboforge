@@ -88,6 +88,26 @@ Projects:
   integration event contracts live — and how the context tests allow them —
   is decided together with the outbox.
 
+## Naming (2026-10-08)
+
+File and type names follow the MDD configurator project (`app/V1`): a name
+describes what the file does and ends with its role suffix
+(`ValidateRequestPipelineBehavior`, `MapExceptionsToProblemDetailsExceptionHandler`,
+`OrderCannotBeCancelledInProductionException`); aggregates end with
+`Aggregate`, enums with `Enum`, events with `Event`, commands/queries/handlers
+with `Command`/`Query`/`Handler`. The full table lives in the agent rules
+(`AGENTS_DOTNET_RULES.md`, local). Template types were renamed accordingly
+(`DependencyInjection` → `{Layer}LayerServiceRegistration`, `Services` →
+`AspireResourceNames`, which also removes its clash with
+`WebApplicationFactory.Services`).
+
+- `CA1711` and `S2344` are suppressed so `…Enum` and `…EventHandler` names
+  are allowed.
+- Acronyms keep C# casing (`Dto`, not `DTO`) to keep the PascalCase rule
+  `S101` active.
+- `DomainException` is abstract: every business rule gets its own exception
+  type named after the situation.
+
 ## References
 
 - Solution template: https://github.com/jasontaylordev/CleanArchitecture

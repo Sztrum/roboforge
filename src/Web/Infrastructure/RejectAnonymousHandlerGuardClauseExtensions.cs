@@ -1,8 +1,8 @@
-﻿using System.Reflection;
+using System.Reflection;
 
 namespace RoboForge.Web.Infrastructure;
 
-public static class MethodInfoExtensions
+public static class RejectAnonymousHandlerGuardClauseExtensions
 {
     // Compiler-generated anonymous methods (lambdas, local functions) contain '<' and '>' in their names.
     private static readonly char[] AnonymousMethodChars = ['<', '>'];

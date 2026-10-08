@@ -3,12 +3,12 @@ using RoboForge.Application.Common.Exceptions;
 
 namespace RoboForge.Application.UnitTests.Common.Exceptions;
 
-public class ValidationExceptionTests
+public class RequestValidationFailedExceptionErrorGroupingTest
 {
     [Fact]
     public void Constructor_WithoutFailures_CreatesEmptyErrorDictionary()
     {
-        var actual = new ValidationException().Errors;
+        var actual = new RequestValidationFailedException().Errors;
 
         actual.Keys.ShouldBeEmpty();
     }
@@ -21,7 +21,7 @@ public class ValidationExceptionTests
             new("Age", "must be over 18"),
         };
 
-        var actual = new ValidationException(failures).Errors;
+        var actual = new RequestValidationFailedException(failures).Errors;
 
         actual.Keys.ShouldBe(["Age"]);
         actual["Age"].ShouldBe(["must be over 18"]);
@@ -40,7 +40,7 @@ public class ValidationExceptionTests
             new("Password", "must contain lower case letter"),
         };
 
-        var actual = new ValidationException(failures).Errors;
+        var actual = new RequestValidationFailedException(failures).Errors;
 
         actual.Keys.ShouldBe(["Password", "Age"], ignoreOrder: true);
 

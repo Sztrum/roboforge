@@ -2,7 +2,7 @@ using System.Reflection;
 
 namespace RoboForge.Web.Infrastructure;
 
-public static class WebApplicationExtensions
+public static class MapEndpointGroupsWebApplicationExtensions
 {
     /// <summary>
     /// Discovers all <see cref="IEndpointGroup"/> implementations in <paramref name="assembly"/>

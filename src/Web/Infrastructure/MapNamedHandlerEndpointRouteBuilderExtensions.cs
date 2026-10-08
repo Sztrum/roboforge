@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RoboForge.Web.Infrastructure;
 
@@ -14,9 +14,9 @@ namespace RoboForge.Web.Infrastructure;
 /// operations that almost always target a specific item by ID, e.g. <c>"{id}"</c>).
 /// </para>
 /// </summary>
-public static class EndpointRouteBuilderExtensions
+public static class MapNamedHandlerEndpointRouteBuilderExtensions
 {
-    /// <inheritdoc cref="EndpointRouteBuilderExtensions"/>
+    /// <inheritdoc cref="MapNamedHandlerEndpointRouteBuilderExtensions"/>
     public static RouteHandlerBuilder MapGet(this IEndpointRouteBuilder builder, Delegate handler, [StringSyntax("Route")] string pattern = "")
     {
         Guard.Against.AnonymousMethod(handler);
@@ -25,7 +25,7 @@ public static class EndpointRouteBuilderExtensions
               .WithName(handler.Method.Name);
     }
 
-    /// <inheritdoc cref="EndpointRouteBuilderExtensions"/>
+    /// <inheritdoc cref="MapNamedHandlerEndpointRouteBuilderExtensions"/>
     public static RouteHandlerBuilder MapPost(this IEndpointRouteBuilder builder, Delegate handler, [StringSyntax("Route")] string pattern = "")
     {
         Guard.Against.AnonymousMethod(handler);
@@ -34,7 +34,7 @@ public static class EndpointRouteBuilderExtensions
             .WithName(handler.Method.Name);
     }
 
-    /// <inheritdoc cref="EndpointRouteBuilderExtensions"/>
+    /// <inheritdoc cref="MapNamedHandlerEndpointRouteBuilderExtensions"/>
     public static RouteHandlerBuilder MapPut(this IEndpointRouteBuilder builder, Delegate handler, [StringSyntax("Route")] string pattern)
     {
         Guard.Against.AnonymousMethod(handler);
@@ -43,7 +43,7 @@ public static class EndpointRouteBuilderExtensions
             .WithName(handler.Method.Name);
     }
 
-    /// <inheritdoc cref="EndpointRouteBuilderExtensions"/>
+    /// <inheritdoc cref="MapNamedHandlerEndpointRouteBuilderExtensions"/>
     public static RouteHandlerBuilder MapPatch(this IEndpointRouteBuilder builder, Delegate handler, [StringSyntax("Route")] string pattern)
     {
         Guard.Against.AnonymousMethod(handler);
@@ -52,7 +52,7 @@ public static class EndpointRouteBuilderExtensions
             .WithName(handler.Method.Name);
     }
 
-    /// <inheritdoc cref="EndpointRouteBuilderExtensions"/>
+    /// <inheritdoc cref="MapNamedHandlerEndpointRouteBuilderExtensions"/>
     public static RouteHandlerBuilder MapDelete(this IEndpointRouteBuilder builder, Delegate handler, [StringSyntax("Route")] string pattern)
     {
         Guard.Against.AnonymousMethod(handler);

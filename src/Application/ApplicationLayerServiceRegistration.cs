@@ -4,7 +4,7 @@ using RoboForge.Application.Common.Behaviours;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
-public static class DependencyInjection
+public static class ApplicationLayerServiceRegistration
 {
     public static void AddApplicationServices(this IHostApplicationBuilder builder)
     {
@@ -15,9 +15,9 @@ public static class DependencyInjection
             options.ServiceLifetime = ServiceLifetime.Scoped;
             options.PipelineBehaviors =
             [
-                typeof(LoggingBehaviour<,>),
-                typeof(ValidationBehaviour<,>),
-                typeof(PerformanceBehaviour<,>),
+                typeof(LogRequestPipelineBehavior<,>),
+                typeof(ValidateRequestPipelineBehavior<,>),
+                typeof(WarnAboutSlowRequestPipelineBehavior<,>),
             ];
         });
     }

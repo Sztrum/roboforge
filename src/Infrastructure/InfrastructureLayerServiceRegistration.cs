@@ -6,12 +6,12 @@ using RoboForge.Infrastructure.Data;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
-public static class DependencyInjection
+public static class InfrastructureLayerServiceRegistration
 {
     public static void AddInfrastructureServices(this IHostApplicationBuilder builder)
     {
-        var connectionString = builder.Configuration.GetConnectionString(Services.Database);
-        Guard.Against.Null(connectionString, message: $"Connection string '{Services.Database}' not found.");
+        var connectionString = builder.Configuration.GetConnectionString(AspireResourceNames.Database);
+        Guard.Against.Null(connectionString, message: $"Connection string '{AspireResourceNames.Database}' not found.");
 
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
 
@@ -19,6 +19,6 @@ public static class DependencyInjection
 
         builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
-        builder.Services.AddScoped<ApplicationDbContextInitialiser>();
+        builder.Services.AddScoped<ApplyPendingMigrationsDatabaseInitialiser>();
     }
 }

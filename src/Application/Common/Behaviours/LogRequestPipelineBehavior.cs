@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace RoboForge.Application.Common.Behaviours;
 
-public sealed partial class LoggingBehaviour<TMessage, TResponse>(ILogger<LoggingBehaviour<TMessage, TResponse>> logger)
+public sealed partial class LogRequestPipelineBehavior<TMessage, TResponse>(ILogger<LogRequestPipelineBehavior<TMessage, TResponse>> logger)
     : IPipelineBehavior<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {

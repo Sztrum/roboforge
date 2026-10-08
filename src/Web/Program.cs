@@ -15,7 +15,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    await app.InitialiseDatabaseAsync();
+    await app.ApplyPendingMigrationsAsync();
 }
 else
 {
