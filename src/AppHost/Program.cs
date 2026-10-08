@@ -1,3 +1,4 @@
+using RoboForge.AppHost;
 using RoboForge.Shared;
 
 var builder = DistributedApplication.CreateBuilder(args);
@@ -18,4 +19,4 @@ builder.AddProject<Projects.Web>(Services.WebApi)
         url.Url = "/scalar";
     });
 
-builder.Build().Run();
+await builder.Build().RunAsync();

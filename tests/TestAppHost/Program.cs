@@ -2,15 +2,15 @@ using RoboForge.Shared;
 
 namespace RoboForge.TestAppHost;
 
-public class Program
+public static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = DistributedApplication.CreateBuilder(args);
 
         builder.AddPostgres(Services.DatabaseServer)
             .AddDatabase(Services.Database);
 
-        builder.Build().Run();
+        await builder.Build().RunAsync();
     }
 }

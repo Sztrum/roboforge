@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace RoboForge.Application.Common.Behaviours;
 
-public sealed class LoggingBehaviour<TMessage, TResponse>(ILogger<TMessage> logger)
+public sealed partial class LoggingBehaviour<TMessage, TResponse>(ILogger<LoggingBehaviour<TMessage, TResponse>> logger)
     : IPipelineBehavior<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {
@@ -11,8 +11,11 @@ public sealed class LoggingBehaviour<TMessage, TResponse>(ILogger<TMessage> logg
         MessageHandlerDelegate<TMessage, TResponse> next,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("RoboForge Request: {Name} {@Request}", typeof(TMessage).Name, message);
+        LogRequest(typeof(TMessage).Name, message);
 
         return next(message, cancellationToken);
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "RoboForge Request: {Name} {@Request}")]
+    private partial void LogRequest(string name, TMessage request);
 }

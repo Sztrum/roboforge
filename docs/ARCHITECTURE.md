@@ -16,11 +16,11 @@ plan: `docs/PROJECT.md`.
 Projects:
 
 - `src/Domain` — no package references. `Common/` holds `AggregateRoot<TId>`,
-  `IDomainEvent`, `DomainException` (carries the violated rule ID) and
-  `ValueObject`. Bounded-context folders (`Catalog/`, `Sales/`,
+  `IDomainEvent` and `DomainException` (carries the violated rule ID).
+  Value objects are immutable `record`s (value equality built in). Bounded-context folders (`Catalog/`, `Sales/`,
   `Production/`) appear with their first types in stages 2–5.
-- `src/Application` — Mediator pipeline (logging, unhandled exceptions,
-  FluentValidation, slow-request warning), `IApplicationDbContext`.
+- `src/Application` — Mediator pipeline (request logging, FluentValidation,
+  slow-request warning), `IApplicationDbContext`.
 - `src/Infrastructure` — `ApplicationDbContext` (EF Core + Npgsql); the
   schema is managed by EF Core migrations applied on start-up in Development.
 - `src/Web` — Minimal API endpoint groups (`IEndpointGroup`), OpenAPI +
@@ -29,7 +29,8 @@ Projects:
 - `src/ServiceDefaults`, `src/Shared` — Aspire defaults (OpenTelemetry,
   health checks at `/health` and `/alive` in Development) and resource names.
 - `tests/Domain.UnitTests`, `tests/Application.UnitTests`,
-  `tests/Application.FunctionalTests` (+ `tests/TestAppHost`).
+  `tests/Application.FunctionalTests` (+ `tests/TestAppHost`),
+  `tests/Architecture.Tests`.
 
 ### Decisions
 
@@ -60,6 +61,32 @@ Projects:
   container, with no second container library to maintain.
 - **`ASPIRE010` is suppressed** in the app hosts: DCP and the dashboard come
   from NuGet packages, so `dotnet run` works without the Aspire CLI.
+
+## Quality gates (stage 1, 2026-10-08)
+
+- **Analyzers in every project:** Roslynator and SonarAnalyzer as
+  `GlobalPackageReference` (`Directory.Packages.props`), plus the .NET
+  analyzers at `AnalysisLevel` `latest-recommended` and code style enforced
+  in the build. With `TreatWarningsAsErrors` every finding fails the build.
+- **Suppressed rules** (`.editorconfig`, each with its reason):
+  `RCS1194` (domain exceptions require a rule ID), `CA1716` (`Shared` is
+  only a VB keyword), `CA1707` in `tests/` (test names use underscores).
+- **Fixes the analyzers forced on template code:** source-generated
+  `LoggerMessage` logging; `UnhandledExceptionBehaviour` removed (it logged
+  and rethrew, so ASP.NET Core logged every exception twice and business
+  rule violations showed up as errors); the open CORS policy removed (no
+  browser client yet; add one with explicit origins when needed); the
+  template `ValueObject` base class removed (value objects are `record`s).
+- **Architecture tests** (NetArchTest, `tests/Architecture.Tests`):
+  Domain depends on no framework and no outer layer; Application does not
+  depend on Infrastructure, Web, Npgsql or ASP.NET Core; Infrastructure does
+  not depend on Web; within Domain and within Application no bounded
+  context depends on another. Verified to fail on a deliberate
+  Sales → Production reference.
+- **Open question for stage 4:** handlers in one context react to events
+  of another (e.g. Sales handles `ProductionStageCompleted`). Where those
+  integration event contracts live — and how the context tests allow them —
+  is decided together with the outbox.
 
 ## References
 

@@ -24,10 +24,6 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseCors(static builder =>
-    builder.AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowAnyOrigin());
 
 app.UseFileServer();
 
@@ -41,4 +37,4 @@ app.Map("/", () => Results.Redirect("/scalar"));
 app.MapDefaultEndpoints();
 app.MapEndpoints(typeof(Program).Assembly);
 
-app.Run();
+await app.RunAsync();

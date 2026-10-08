@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace RoboForge.Application.Common.Behaviours;
 
-public sealed class PerformanceBehaviour<TMessage, TResponse>(ILogger<TMessage> logger)
+public sealed partial class PerformanceBehaviour<TMessage, TResponse>(ILogger<PerformanceBehaviour<TMessage, TResponse>> logger)
     : IPipelineBehavior<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {
@@ -22,11 +22,12 @@ public sealed class PerformanceBehaviour<TMessage, TResponse>(ILogger<TMessage> 
 
         if (elapsedMilliseconds > SlowRequestThresholdMilliseconds)
         {
-            logger.LogWarning(
-                "RoboForge Long Running Request: {Name} ({ElapsedMilliseconds} milliseconds) {@Request}",
-                typeof(TMessage).Name, elapsedMilliseconds, message);
+            LogSlowRequest(typeof(TMessage).Name, elapsedMilliseconds, message);
         }
 
         return response;
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "RoboForge Long Running Request: {Name} ({ElapsedMilliseconds} milliseconds) {@Request}")]
+    private partial void LogSlowRequest(string name, long elapsedMilliseconds, TMessage request);
 }
