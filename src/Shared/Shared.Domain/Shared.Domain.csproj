@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>RoboForge.Shared.Domain</RootNamespace>
+    <AssemblyName>RoboForge.Shared.Domain</AssemblyName>
+  </PropertyGroup>
+
+</Project>

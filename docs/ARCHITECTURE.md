@@ -13,24 +13,9 @@ The solution was generated from Jason Taylor's Clean Architecture template
 Aspire 13) and trimmed to what the MVP needs. Target architecture and stage
 plan: `docs/PROJECT.md`.
 
-Projects:
-
-- `src/Domain` — no package references. `Common/` holds `AggregateRoot<TId>`,
-  `IDomainEvent` and `DomainException` (carries the violated rule ID).
-  Value objects are immutable `record`s (value equality built in). Bounded-context folders (`Catalog/`, `Sales/`,
-  `Production/`) appear with their first types in stages 2–5.
-- `src/Application` — Mediator pipeline (request logging, FluentValidation,
-  slow-request warning), `IApplicationDbContext`.
-- `src/Infrastructure` — `ApplicationDbContext` (EF Core + Npgsql); the
-  schema is managed by EF Core migrations applied on start-up in Development.
-- `src/Web` — Minimal API endpoint groups (`IEndpointGroup`), OpenAPI +
-  Scalar, `ProblemDetails` mapping.
-- `src/AppHost` — Aspire: PostgreSQL container (persistent) + Web API.
-- `src/ServiceDefaults`, `src/Shared` — Aspire defaults (OpenTelemetry,
-  health checks at `/health` and `/alive` in Development) and resource names.
-- `tests/Domain.UnitTests`, `tests/Application.UnitTests`,
-  `tests/Application.FunctionalTests` (+ `tests/TestAppHost`),
-  `tests/Architecture.Tests`.
+The initial layer-first layout (one `Domain`, `Application`, `Infrastructure`
+and `Web` project) was replaced by a module-first layout the same day; see
+"Module-first layout" below.
 
 ### Decisions
 
@@ -77,16 +62,65 @@ Projects:
   rule violations showed up as errors); the open CORS policy removed (no
   browser client yet; add one with explicit origins when needed); the
   template `ValueObject` base class removed (value objects are `record`s).
-- **Architecture tests** (NetArchTest, `tests/Architecture.Tests`):
-  Domain depends on no framework and no outer layer; Application does not
-  depend on Infrastructure, Web, Npgsql or ASP.NET Core; Infrastructure does
-  not depend on Web; within Domain and within Application no bounded
-  context depends on another. Verified to fail on a deliberate
-  Sales → Production reference.
-- **Open question for stage 4:** handlers in one context react to events
-  of another (e.g. Sales handles `ProductionStageCompleted`). Where those
-  integration event contracts live — and how the context tests allow them —
-  is decided together with the outbox.
+- **Architecture tests** (NetArchTest, `tests/Architecture.Tests`): see
+  "Module-first layout" for the current rules.
+
+## Module-first layout (2026-10-08)
+
+Decision: each bounded context is a module with its own layer projects, as in
+the MDD configurator (`app/V1/Modules/{Module}/{Domain,Application,Infrastructure,UI}`)
+and the DDD reference (kgrzybek/modular-monolith-with-ddd). All code of one
+module lives in one folder, and the compiler enforces the layers inside it.
+
+```
+src/
+├── AppHost/                    Aspire: PostgreSQL + API + dashboard
+├── ServiceDefaults/            OpenTelemetry, health checks, resilience
+├── Web/                        API host: composes the modules, Mediator pipeline,
+│                               exception → ProblemDetails, OpenAPI, migrations on start-up
+├── Shared/
+│   ├── Shared.Domain/          AggregateRoot<TId>, IDomainEvent, DomainException (later Money, LeadTime)
+│   ├── Shared.Application/     pipeline behaviours, RequestValidationFailedException
+│   ├── Shared.UI/              IEndpointGroup and endpoint-group mapping
+│   └── Shared.Hosting/         Aspire resource names
+└── Modules/
+    └── Catalog/                (Sales and Production follow in stages 3–5)
+        ├── Catalog.Domain/
+        ├── Catalog.Application/
+        ├── Catalog.Infrastructure/   CatalogDbContext, module registration
+        └── Catalog.UI/               endpoint groups (/api/parts)
+tests/
+├── Shared/Shared.{Domain,Application}.UnitTests/
+├── Modules/{Module}/{Module}.Domain.UnitTests/   (from stage 2)
+├── Architecture.Tests/
+├── Web.FunctionalTests/
+└── TestAppHost/
+```
+
+- **Project references inside a module:** `UI → Application`,
+  `Infrastructure → Application → Domain`; `Domain → Shared.Domain`,
+  `Application → Shared.Application`, `UI → Shared.UI`. No module references
+  another module.
+- **One `DbContext` per module, one schema per module** (`catalog`, later
+  `sales`, `production`), each with its own migrations and migration history
+  table in its schema. Modules therefore share no tables. `Web` applies each
+  module's pending migrations on start-up in Development.
+- **Each module registers itself:** `Add{Module}Module()` in
+  `{Module}.Infrastructure` and `Map{Module}ModuleEndpoints()` in
+  `{Module}.UI`; `Web/Program.cs` only calls them.
+- **The Mediator source generator runs in `Web`**, the only project that
+  references every module, so it finds all handlers. Modules reference only
+  `Mediator.Abstractions`.
+- **Architecture tests** check, for every module: Domain uses no framework and
+  no outer layer; Application uses no Infrastructure, UI, Npgsql or ASP.NET
+  Core; Infrastructure uses no UI; no layer uses another bounded context
+  (Sales and Production are already named); shared code uses no module.
+  A new module is added to `ProjectAssemblies.ExistingModules` and referenced
+  in `Architecture.Tests.csproj`. Verified to fail on a deliberate EF Core
+  reference in `Catalog.Domain`.
+- **Integration events** between modules (stage 4) will need contracts both
+  sides can reference; the reference repository uses a separate
+  `{Module}.IntegrationEvents` project per module. Decided with the outbox.
 
 ## Continuous integration (stage 1, 2026-10-08)
 
@@ -107,7 +141,7 @@ describes what the file does and ends with its role suffix
 `Aggregate`, enums with `Enum`, events with `Event`, commands/queries/handlers
 with `Command`/`Query`/`Handler`. The full table lives in the agent rules
 (`AGENTS_DOTNET_RULES.md`, local). Template types were renamed accordingly
-(`DependencyInjection` → `{Layer}LayerServiceRegistration`, `Services` →
+(`DependencyInjection` → service-registration classes, `Services` →
 `AspireResourceNames`, which also removes its clash with
 `WebApplicationFactory.Services`).
 

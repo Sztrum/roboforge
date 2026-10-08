@@ -18,11 +18,15 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <!-- Every module project must be referenced here so its assembly can be inspected. -->
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Domain\Domain.csproj" />
-    <ProjectReference Include="..\..\src\Application\Application.csproj" />
-    <ProjectReference Include="..\..\src\Infrastructure\Infrastructure.csproj" />
-    <ProjectReference Include="..\..\src\Web\Web.csproj" />
+    <ProjectReference Include="..\..\src\Shared\Shared.Domain\Shared.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Shared\Shared.Application\Shared.Application.csproj" />
+    <ProjectReference Include="..\..\src\Shared\Shared.UI\Shared.UI.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Catalog\Catalog.Domain\Catalog.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Catalog\Catalog.Application\Catalog.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Catalog\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Catalog\Catalog.UI\Catalog.UI.csproj" />
   </ItemGroup>
 
 </Project>
