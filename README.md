@@ -1,5 +1,7 @@
 # RoboForge
 
+[![CI](https://github.com/Sztrum/roboforge/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Sztrum/roboforge/actions/workflows/ci.yml)
+
 A robot configurator and production workflow built with .NET 10, Clean
 Architecture and DDD. Customers assemble a small robot from catalog parts; the
 workshop takes the order through production stages up to shipping.
