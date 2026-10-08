@@ -8,8 +8,8 @@ public static class Program
     {
         var builder = DistributedApplication.CreateBuilder(args);
 
-        builder.AddPostgres(Services.DatabaseServer)
-            .AddDatabase(Services.Database);
+        builder.AddPostgres(AspireResourceNames.DatabaseServer)
+            .AddDatabase(AspireResourceNames.Database);
 
         await builder.Build().RunAsync();
     }

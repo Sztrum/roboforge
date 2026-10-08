@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
-public static class DependencyInjection
+public static class WebLayerServiceRegistration
 {
     public static void AddWebServices(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
+        builder.Services.AddExceptionHandler<MapExceptionsToProblemDetailsExceptionHandler>();
 
         // Customise default API behaviour
         builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -15,6 +15,6 @@ public static class DependencyInjection
         builder.Services.AddEndpointsApiExplorer();
 
         builder.Services.AddOpenApi(options =>
-            options.AddOperationTransformer<ApiExceptionOperationTransformer>());
+            options.AddOperationTransformer<AddErrorResponsesOpenApiOperationTransformer>());
     }
 }

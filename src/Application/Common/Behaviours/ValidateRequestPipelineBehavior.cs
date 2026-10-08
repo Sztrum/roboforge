@@ -1,8 +1,8 @@
-using ValidationException = RoboForge.Application.Common.Exceptions.ValidationException;
+using RoboForge.Application.Common.Exceptions;
 
 namespace RoboForge.Application.Common.Behaviours;
 
-public sealed class ValidationBehaviour<TMessage, TResponse>(IEnumerable<IValidator<TMessage>> validators)
+public sealed class ValidateRequestPipelineBehavior<TMessage, TResponse>(IEnumerable<IValidator<TMessage>> validators)
     : IPipelineBehavior<TMessage, TResponse>
     where TMessage : notnull, IMessage
 {
@@ -23,7 +23,7 @@ public sealed class ValidationBehaviour<TMessage, TResponse>(IEnumerable<IValida
 
             if (failures.Count != 0)
             {
-                throw new ValidationException(failures);
+                throw new RequestValidationFailedException(failures);
             }
         }
 

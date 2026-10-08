@@ -3,7 +3,7 @@ using TestResult = NetArchTest.Rules.TestResult;
 
 namespace RoboForge.Architecture.Tests;
 
-public class LayerDependencyTests
+public class LayerDependencyArchitectureTest
 {
     [Theory]
     [InlineData("Microsoft.EntityFrameworkCore")]
@@ -13,7 +13,7 @@ public class LayerDependencyTests
     [InlineData("FluentValidation")]
     public void Domain_ShouldNotDependOn_Frameworks(string framework)
     {
-        var result = Types.InAssembly(Layers.Domain)
+        var result = Types.InAssembly(LayerAssemblies.Domain)
             .ShouldNot().HaveDependencyOn(framework)
             .GetResult();
 
@@ -26,7 +26,7 @@ public class LayerDependencyTests
     [InlineData("RoboForge.Web")]
     public void Domain_ShouldNotDependOn_OuterLayers(string layer)
     {
-        var result = Types.InAssembly(Layers.Domain)
+        var result = Types.InAssembly(LayerAssemblies.Domain)
             .ShouldNot().HaveDependencyOn(layer)
             .GetResult();
 
@@ -40,7 +40,7 @@ public class LayerDependencyTests
     [InlineData("Microsoft.AspNetCore")]
     public void Application_ShouldNotDependOn_OuterLayers(string dependency)
     {
-        var result = Types.InAssembly(Layers.Application)
+        var result = Types.InAssembly(LayerAssemblies.Application)
             .ShouldNot().HaveDependencyOn(dependency)
             .GetResult();
 
@@ -50,7 +50,7 @@ public class LayerDependencyTests
     [Fact]
     public void Infrastructure_ShouldNotDependOn_Web()
     {
-        var result = Types.InAssembly(Layers.Infrastructure)
+        var result = Types.InAssembly(LayerAssemblies.Infrastructure)
             .ShouldNot().HaveDependencyOn("RoboForge.Web")
             .GetResult();
 

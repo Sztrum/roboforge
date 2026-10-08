@@ -4,11 +4,11 @@ using RoboForge.Shared;
 var builder = DistributedApplication.CreateBuilder(args);
 
 var database = builder
-    .AddPostgres(Services.DatabaseServer)
+    .AddPostgres(AspireResourceNames.DatabaseServer)
     .WithLifetime(ContainerLifetime.Persistent)
-    .AddDatabase(Services.Database);
+    .AddDatabase(AspireResourceNames.Database);
 
-builder.AddProject<Projects.Web>(Services.WebApi)
+builder.AddProject<Projects.Web>(AspireResourceNames.WebApi)
     .WithReference(database)
     .WaitFor(database)
     .WithExternalHttpEndpoints()

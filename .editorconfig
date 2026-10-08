@@ -391,6 +391,11 @@ dotnet_diagnostic.RCS1194.severity = none
 # 'Shared' is a Visual Basic keyword; this solution is C#-only.
 dotnet_diagnostic.CA1716.severity = none
 
+# Naming follows the MDD configurator conventions (AGENTS_DOTNET_RULES.md):
+# enums end with 'Enum' and event handlers with 'EventHandler'.
+dotnet_diagnostic.CA1711.severity = none
+dotnet_diagnostic.S2344.severity = none
+
 [tests/**.cs]
 
 # Test names follow Method_Condition_ExpectedResult (AGENTS_DOTNET_RULES.md).

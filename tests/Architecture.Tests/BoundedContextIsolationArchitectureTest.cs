@@ -6,7 +6,7 @@ namespace RoboForge.Architecture.Tests;
 /// Bounded contexts (Catalog, Sales, Production) must not use each other's domain model;
 /// they integrate only through events (docs/PROJECT.md, "Domain events and integration").
 /// </summary>
-public class BoundedContextTests
+public class BoundedContextIsolationArchitectureTest
 {
     [Theory]
     [InlineData("Catalog", "Sales")]
@@ -17,12 +17,12 @@ public class BoundedContextTests
     [InlineData("Production", "Sales")]
     public void DomainContext_ShouldNotDependOn_OtherContext(string context, string otherContext)
     {
-        var result = Types.InAssembly(Layers.Domain)
+        var result = Types.InAssembly(LayerAssemblies.Domain)
             .That().ResideInNamespace($"RoboForge.Domain.{context}")
             .ShouldNot().HaveDependencyOn($"RoboForge.Domain.{otherContext}")
             .GetResult();
 
-        result.IsSuccessful.ShouldBeTrue(LayerDependencyTests.FailingTypes(result));
+        result.IsSuccessful.ShouldBeTrue(LayerDependencyArchitectureTest.FailingTypes(result));
     }
 
     [Theory]
@@ -34,11 +34,11 @@ public class BoundedContextTests
     [InlineData("Production", "Sales")]
     public void ApplicationContext_ShouldNotDependOn_OtherContext(string context, string otherContext)
     {
-        var result = Types.InAssembly(Layers.Application)
+        var result = Types.InAssembly(LayerAssemblies.Application)
             .That().ResideInNamespace($"RoboForge.Application.{context}")
             .ShouldNot().HaveDependencyOn($"RoboForge.Application.{otherContext}")
             .GetResult();
 
-        result.IsSuccessful.ShouldBeTrue(LayerDependencyTests.FailingTypes(result));
+        result.IsSuccessful.ShouldBeTrue(LayerDependencyArchitectureTest.FailingTypes(result));
     }
 }

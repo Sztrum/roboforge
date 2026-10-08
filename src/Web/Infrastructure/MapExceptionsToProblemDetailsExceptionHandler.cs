@@ -7,17 +7,17 @@ namespace RoboForge.Web.Infrastructure;
 
 /// <summary>
 /// Converts well-known exceptions into RFC 9457 <see cref="ProblemDetails"/> responses,
-/// mapping <see cref="ValidationException"/> → 400, <see cref="NotFoundException"/> → 404
+/// mapping <see cref="RequestValidationFailedException"/> → 400, <see cref="NotFoundException"/> → 404
 /// and <see cref="DomainException"/> → 422 with the violated rule ID.
 /// Unrecognised exceptions are not handled and fall through to the default middleware.
 /// </summary>
-public sealed class ProblemDetailsExceptionHandler : IExceptionHandler
+public sealed class MapExceptionsToProblemDetailsExceptionHandler : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         var problemDetails = exception switch
         {
-            ValidationException ve => new ValidationProblemDetails(ve.Errors)
+            RequestValidationFailedException ve => new ValidationProblemDetails(ve.Errors)
             {
                 Status = StatusCodes.Status400BadRequest,
                 Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1"

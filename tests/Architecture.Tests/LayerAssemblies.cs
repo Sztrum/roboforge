@@ -2,7 +2,7 @@ using System.Reflection;
 
 namespace RoboForge.Architecture.Tests;
 
-internal static class Layers
+internal static class LayerAssemblies
 {
     public static readonly Assembly Domain = Assembly.Load("RoboForge.Domain");
     public static readonly Assembly Application = Assembly.Load("RoboForge.Application");
