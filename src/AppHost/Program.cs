@@ -1,5 +1,5 @@
 using RoboForge.AppHost;
-using RoboForge.Shared;
+using RoboForge.Shared.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 

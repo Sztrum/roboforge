@@ -11,9 +11,4 @@ No open review findings.
 
 ## Project follow-ups
 
-### PF-003 — Require the CI check on `main`
-
-- **Status:** Open
-- **Next action:** After the CI workflow (stage 1, PR 3) has run green once,
-  the repository owner adds it as a required status check in the `main`
-  branch protection.
+No open project follow-ups.

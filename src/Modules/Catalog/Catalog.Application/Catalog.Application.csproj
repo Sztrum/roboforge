@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>RoboForge.Modules.Catalog.Application</RootNamespace>
+    <AssemblyName>RoboForge.Modules.Catalog.Application</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Catalog.Domain\Catalog.Domain.csproj" />
+    <ProjectReference Include="..\..\..\Shared\Shared.Application\Shared.Application.csproj" />
+  </ItemGroup>
+
+</Project>

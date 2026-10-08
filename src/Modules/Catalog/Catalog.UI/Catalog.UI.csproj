@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>RoboForge.Modules.Catalog.UI</RootNamespace>
+    <AssemblyName>RoboForge.Modules.Catalog.UI</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Catalog.Application\Catalog.Application.csproj" />
+    <ProjectReference Include="..\..\..\Shared\Shared.UI\Shared.UI.csproj" />
+  </ItemGroup>
+
+</Project>

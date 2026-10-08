@@ -164,7 +164,30 @@ awaiting the user's review. Do not start the next stage without approval.
    `Directory.Build.props`, analyzers, GitHub Actions CI, first architecture
    test.
 2. **Catalog** — `PartAggregate`, `Money` and `TechSpec` value objects,
-   commands, seed with ~12 parts.
+   commands, seed with ~12 parts. Split into small tasks, one branch and PR
+   each (the owner writes 1–12 against prepared failing tests):
+   1. `Money` creation; a negative amount is rejected
+   2. `Money` rounds to two decimal places
+   3. `Money` addition; different currencies are rejected
+   4. `Money` multiplication by a factor or a quantity
+   5. `PartCategoryEnum`, `MountTypeEnum`
+   6. `LeadTime` (working days, at least 1; `Combine` comes in stage 3)
+   7. `TechSpec` (mount type, voltage, max load, weight; positive values)
+   8. `PartId` (strongly typed ID)
+   9. `PartAggregate.Create(...)`; the name must not be empty
+   10. `PartAggregate.ChangePrice(...)`
+   11. `PartAggregate.Discontinue()` raises `PartDiscontinuedEvent`
+   12. a discontinued part cannot be repriced or discontinued again
+   13. `CatalogDbContext` mapping and the first migration
+   14. `IndexPartQuery` + `GET /api/parts?category=`
+   15. seed with 12 parts
+   16. `StorePartCommand` + validator + `POST /api/parts`
+   17. `ChangePartPriceCommand` + `PUT /api/parts/{id}/price`
+   18. `DiscontinuePartCommand` + `POST /api/parts/{id}/discontinue`
+   19. `.http` scenario file
+
+   Proposed defaults, awaiting the owner's confirmation: PLN only in the MVP, but `Money` carries its
+   currency; discontinuing a part is final (no reactivation).
 3. **Configurator** — `RobotConfigurationAggregate`, `RobotPartsCompatibilityPolicy`
    (R1–R4, R7), `RobotConfigurationPricingPolicy` (R5), `LeadTime` (R6), `/quote` endpoint, tests for each
    rule.

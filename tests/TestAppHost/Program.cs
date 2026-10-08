@@ -1,4 +1,4 @@
-using RoboForge.Shared;
+using RoboForge.Shared.Hosting;
 
 namespace RoboForge.TestAppHost;
 
