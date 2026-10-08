@@ -380,3 +380,18 @@ dotnet_naming_style.s_camelcase.word_separator =
 dotnet_naming_style.s_camelcase.capitalization = camel_case
 
 dotnet_style_namespace_match_folder = true:suggestion
+
+#### Analyzer adjustments ####
+[*.cs]
+
+# Domain exceptions must carry the violated rule ID, so the standard
+# parameterless/message-only constructors are intentionally missing.
+dotnet_diagnostic.RCS1194.severity = none
+
+# 'Shared' is a Visual Basic keyword; this solution is C#-only.
+dotnet_diagnostic.CA1716.severity = none
+
+[tests/**.cs]
+
+# Test names follow Method_Condition_ExpectedResult (AGENTS_DOTNET_RULES.md).
+dotnet_diagnostic.CA1707.severity = none
