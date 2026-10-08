@@ -88,6 +88,16 @@ Projects:
   integration event contracts live — and how the context tests allow them —
   is decided together with the outbox.
 
+## Continuous integration (stage 1, 2026-10-08)
+
+`.github/workflows/ci.yml` runs on every pull request and every push to
+`main`: restore, Release build (analyzers as errors), `dotnet format
+--verify-no-changes`, all tests including the functional tests (the
+`ubuntu-latest` runner has Docker for the Aspire-started PostgreSQL), and
+code coverage with `coverlet.MTP`. ReportGenerator turns the Cobertura files
+into a summary on the run page and an HTML report artifact
+(`coverage-report`). The README shows the CI badge.
+
 ## Naming (2026-10-08)
 
 File and type names follow the MDD configurator project (`app/V1`): a name
