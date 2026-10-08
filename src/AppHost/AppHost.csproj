@@ -1,0 +1,22 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.6.1">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- DCP and the dashboard come from NuGet packages, so `dotnet run` works without the Aspire CLI. -->
+    <NoWarn>$(NoWarn);ASPIRE010</NoWarn>
+    <RootNamespace>RoboForge.AppHost</RootNamespace>
+    <AssemblyName>RoboForge.AppHost</AssemblyName>
+    <UserSecretsId>1dbebcc5-5d50-4d8f-95f5-14095e02a0be</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\Shared.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\Web\Web.csproj" />
+  </ItemGroup>
+
+</Project>

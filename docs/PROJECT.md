@@ -107,18 +107,24 @@ Mechanics:
 4. Initially in-process publishing (mediator); later replaceable with
    RabbitMQ + MassTransit without touching the domain.
 
+## References
+
+- Solution template: https://github.com/jasontaylordev/CleanArchitecture
+- DDD reference for patterns (aggregates, domain events, outbox, module
+  boundaries, architecture tests): https://github.com/kgrzybek/modular-monolith-with-ddd
+
 ## Technology
 
 | Area | Choice |
 | --- | --- |
 | Platform | .NET 10, C# 14 |
 | Database | PostgreSQL + EF Core |
-| CQRS | MediatR or `Mediator` (source generator) — decide in stage 1, check licenses |
+| CQRS | `Mediator` (martinothamar, MIT, source generator) — see `docs/ARCHITECTURE.md` |
 | Validation | FluentValidation |
 | Orchestration | .NET Aspire (API + PostgreSQL + dashboard) |
 | API docs | OpenAPI + Scalar |
 | Quality | `Directory.Build.props` with `Nullable`, `TreatWarningsAsErrors`, Roslynator + Sonar analyzers |
-| Tests | xUnit, Shouldly, NetArchTest, Testcontainers, `WebApplicationFactory`, Coverlet |
+| Tests | xUnit v3, Shouldly, NetArchTest, `Aspire.Hosting.Testing` (real PostgreSQL container), `WebApplicationFactory`, Coverlet |
 | CI | GitHub Actions on every push and PR: build, test, coverage, badge |
 
 ## API
