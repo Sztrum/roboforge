@@ -79,7 +79,8 @@ src/
 ├── Web/                        API host: composes the modules, Mediator pipeline,
 │                               exception → ProblemDetails, OpenAPI, migrations on start-up
 ├── Shared/
-│   ├── Shared.Domain/          AggregateRoot<TId>, IDomainEvent, DomainException (later Money, LeadTime)
+│   ├── Shared.Domain/          Aggregates/ (AggregateRoot<TId>), Events/ (IDomainEvent),
+│   │                           Exceptions/ (DomainException, …), ValueObjects/ (Money, later LeadTime)
 │   ├── Shared.Application/     pipeline behaviours, RequestValidationFailedException
 │   ├── Shared.UI/              IEndpointGroup and endpoint-group mapping
 │   └── Shared.Hosting/         Aspire resource names
@@ -97,6 +98,11 @@ tests/
 └── TestAppHost/
 ```
 
+- **Domain folders:** subject first, then one folder per kind, as in the
+  configurator (`Catalog.Domain/Parts/{Enums,Events,Exceptions,ValueObjects}/`,
+  with `PartAggregate` and `PartId` directly in `Parts/`). `Shared.Domain`
+  is split by kind only (`Aggregates/`, `Events/`, `Exceptions/`,
+  `ValueObjects/`).
 - **Project references inside a module:** `UI → Application`,
   `Infrastructure → Application → Domain`; `Domain → Shared.Domain`,
   `Application → Shared.Application`, `UI → Shared.UI`. No module references

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using RoboForge.Shared.Application.Exceptions;
-using RoboForge.Shared.Domain;
+using RoboForge.Shared.Domain.Exceptions;
 
 namespace RoboForge.Web.ErrorHandling;
 

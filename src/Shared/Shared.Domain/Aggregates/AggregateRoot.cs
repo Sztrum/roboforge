@@ -1,4 +1,6 @@
-namespace RoboForge.Shared.Domain;
+using RoboForge.Shared.Domain.Events;
+
+namespace RoboForge.Shared.Domain.Aggregates;
 
 /// <summary>
 /// The only entry point for changing the data of an aggregate. Collects the domain events
