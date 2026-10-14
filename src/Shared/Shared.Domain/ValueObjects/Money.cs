@@ -24,4 +24,14 @@ public sealed record Money
     public decimal Amount { get; }
 
     public string Currency { get; }
+
+    public static Money operator +(Money left, Money right)
+    {
+        if (left.Currency != right.Currency)
+        {
+            throw new MoneyWithDifferentCurrencyCannotBeAddedException(left.Currency, right.Currency);
+        }
+
+        return new Money(left.Amount + right.Amount, left.Currency);
+    }
 }
