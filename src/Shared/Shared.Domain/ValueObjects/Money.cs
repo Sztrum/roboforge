@@ -8,6 +8,8 @@ namespace RoboForge.Shared.Domain.ValueObjects;
 /// </summary>
 public sealed record Money
 {
+    private const int DecimalPlacesOfWholeGrosze = 2;
+
     public Money(decimal amount, string currency)
     {
         if (amount < 0)
@@ -15,7 +17,7 @@ public sealed record Money
             throw new MoneyAmountCannotBeNegativeException(amount);
         }
 
-        Amount = amount;
+        Amount = decimal.Round(amount, DecimalPlacesOfWholeGrosze, MidpointRounding.AwayFromZero);
         Currency = currency;
     }
 

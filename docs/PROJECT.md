@@ -91,6 +91,7 @@ rule IDs, returned the same way as R-rules:
 | # | Rule | Lives in |
 | --- | --- | --- |
 | M1 | An amount of money cannot be negative. | `Money` |
+| M2 | Amounts are kept in whole grosze: rounded to 2 decimal places, halves away from zero (10.005 → 10.01). | `Money` |
 
 R2–R4 span several parts, so they live in the `RobotPartsCompatibilityPolicy` domain
 service, which returns a list of violations instead of throwing on the first
