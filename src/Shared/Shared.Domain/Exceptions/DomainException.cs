@@ -1,4 +1,4 @@
-namespace RoboForge.Shared.Domain;
+namespace RoboForge.Shared.Domain.Exceptions;
 
 /// <summary>
 /// Base class for business-rule violations (R1–R10 in docs/PROJECT.md). Each rule has its own

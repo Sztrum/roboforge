@@ -85,6 +85,13 @@ Numbers are examples and may be changed (record the change here).
 | R9 | Production stages run strictly in order, no skipping. | `ProductionJobAggregate.CompleteStage()` |
 | R10 | Failed QA sends the job back to Assembly; after 2 failures the job is on hold pending a decision. | `ProductionJobAggregate.FailQa()` |
 
+Value objects guard their own invariants with `M…` (money) and similar
+rule IDs, returned the same way as R-rules:
+
+| # | Rule | Lives in |
+| --- | --- | --- |
+| M1 | An amount of money cannot be negative. | `Money` |
+
 R2–R4 span several parts, so they live in the `RobotPartsCompatibilityPolicy` domain
 service, which returns a list of violations instead of throwing on the first
 one — the customer sees all problems at once.
@@ -186,7 +193,7 @@ awaiting the user's review. Do not start the next stage without approval.
    18. `DiscontinuePartCommand` + `POST /api/parts/{id}/discontinue`
    19. `.http` scenario file
 
-   Proposed defaults, awaiting the owner's confirmation: PLN only in the MVP, but `Money` carries its
+   Decisions (confirmed by the owner 2026-10-14): PLN only in the MVP, but `Money` carries its
    currency; discontinuing a part is final (no reactivation).
 3. **Configurator** — `RobotConfigurationAggregate`, `RobotPartsCompatibilityPolicy`
    (R1–R4, R7), `RobotConfigurationPricingPolicy` (R5), `LeadTime` (R6), `/quote` endpoint, tests for each

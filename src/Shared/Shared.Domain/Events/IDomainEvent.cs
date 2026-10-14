@@ -1,4 +1,4 @@
-namespace RoboForge.Shared.Domain;
+namespace RoboForge.Shared.Domain.Events;
 
 /// <summary>
 /// Marks a fact that happened in the domain. Implementations are past-tense records,

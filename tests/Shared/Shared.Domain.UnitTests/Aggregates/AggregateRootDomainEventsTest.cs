@@ -1,4 +1,7 @@
-namespace RoboForge.Shared.Domain.UnitTests;
+using RoboForge.Shared.Domain.Aggregates;
+using RoboForge.Shared.Domain.Events;
+
+namespace RoboForge.Shared.Domain.UnitTests.Aggregates;
 
 public class AggregateRootDomainEventsTest
 {
