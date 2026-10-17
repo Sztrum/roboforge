@@ -123,8 +123,9 @@ the same transaction as the state change.
 Mechanics:
 
 1. The aggregate adds an event via `AddDomainEvent(...)`.
-2. An EF Core interceptor writes events to `OutboxMessages` during
-   `SaveChanges`, in the same transaction.
+2. An EF Core interceptor maps the domain events that other modules need to
+   integration events (`{Module}.IntegrationEvents`) and writes them to the
+   module's `OutboxMessages` during `SaveChanges`, in the same transaction.
 3. A hosted background service polls the outbox and publishes events.
 4. Initially in-process publishing (mediator); later replaceable with
    RabbitMQ + MassTransit without touching the domain.

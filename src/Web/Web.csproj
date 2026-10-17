@@ -3,6 +3,8 @@
   <PropertyGroup>
     <RootNamespace>RoboForge.Web</RootNamespace>
     <AssemblyName>RoboForge.Web</AssemblyName>
+    <!-- MSG0005: an integration event may have no subscriber (publish/subscribe); publishing it is then a no-op. -->
+    <NoWarn>$(NoWarn);MSG0005</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

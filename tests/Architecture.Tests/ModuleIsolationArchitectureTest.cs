@@ -5,21 +5,36 @@ using static RoboForge.Architecture.Tests.ProjectAssemblies;
 namespace RoboForge.Architecture.Tests;
 
 /// <summary>
-/// Modules (bounded contexts) never use each other's code; they integrate only through events
-/// (docs/PROJECT.md, "Domain events and integration"). Shared code knows no module.
+/// Modules (bounded contexts) never use each other's code; they integrate only through the integration
+/// events another module publishes (docs/PROJECT.md, "Domain events and integration"). Shared code knows
+/// no module.
 /// </summary>
 public class ModuleIsolationArchitectureTest
 {
     public static TheoryData<string, string, string> ModuleLayersWithOtherContexts() =>
-        new(ExistingModules.SelectMany(module => ModuleLayers.SelectMany(layer =>
+        new(ExistingModules.SelectMany(module => ModuleLayersWithIntegrationEvents.SelectMany(layer =>
             AllBoundedContexts.Where(other => other != module).Select(other => (module, layer, other)))));
+
+    public static TheoryData<string> AllModules() => new(ExistingModules);
 
     [Theory]
     [MemberData(nameof(ModuleLayersWithOtherContexts))]
-    public void ModuleLayer_ShouldNotDependOn_OtherModule(string module, string layer, string otherModule)
+    public void ModuleLayer_ShouldNotDependOn_OtherModulesPrivateLayers(string module, string layer, string otherModule)
     {
         var result = Types.InAssembly(ModuleLayer(module, layer))
-            .ShouldNot().HaveDependencyOn($"RoboForge.Modules.{otherModule}")
+            .ShouldNot().HaveDependencyOnAny([.. ModuleLayers.Select(otherLayer => ModuleLayerNamespace(otherModule, otherLayer))])
+            .GetResult();
+
+        result.IsSuccessful.ShouldBeTrue(ListViolatingTypes(result));
+    }
+
+    [Theory]
+    [MemberData(nameof(AllModules))]
+    public void IntegrationEvents_ShouldNotDependOn_AnyModuleLayer(string module)
+    {
+        var result = Types.InAssembly(ModuleLayer(module, IntegrationEventsLayer))
+            .ShouldNot().HaveDependencyOnAny([.. AllBoundedContexts.SelectMany(anyModule =>
+                ModuleLayers.Select(anyLayer => ModuleLayerNamespace(anyModule, anyLayer)))])
             .GetResult();
 
         result.IsSuccessful.ShouldBeTrue(ListViolatingTypes(result));

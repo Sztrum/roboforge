@@ -36,7 +36,9 @@ public class ModuleLayerDependencyArchitectureTest
             .ShouldNot().HaveDependencyOnAny(
                 ModuleLayerNamespace(module, "Application"),
                 ModuleLayerNamespace(module, "Infrastructure"),
-                ModuleLayerNamespace(module, "UI"))
+                ModuleLayerNamespace(module, "UI"),
+                ModuleLayerNamespace(module, IntegrationEventsLayer),
+                "RoboForge.Shared.IntegrationEvents")
             .GetResult();
 
         result.IsSuccessful.ShouldBeTrue(ListViolatingTypes(result));

@@ -6,7 +6,7 @@ namespace RoboForge.Shared.Domain.Aggregates;
 /// The only entry point for changing the data of an aggregate. Collects the domain events
 /// raised by its business methods until they are persisted.
 /// </summary>
-public abstract class AggregateRoot<TId>
+public abstract class AggregateRoot<TId> : IAggregateRoot
     where TId : struct
 {
     private readonly List<IDomainEvent> _domainEvents = [];

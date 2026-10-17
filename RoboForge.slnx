@@ -17,6 +17,8 @@
     <Project Path="src/Shared/Shared.Application/Shared.Application.csproj" />
     <Project Path="src/Shared/Shared.Domain/Shared.Domain.csproj" />
     <Project Path="src/Shared/Shared.Hosting/Shared.Hosting.csproj" />
+    <Project Path="src/Shared/Shared.Infrastructure/Shared.Infrastructure.csproj" />
+    <Project Path="src/Shared/Shared.IntegrationEvents/Shared.IntegrationEvents.csproj" />
     <Project Path="src/Shared/Shared.UI/Shared.UI.csproj" />
   </Folder>
   <Folder Name="/src/Modules/" />
@@ -24,6 +26,7 @@
     <Project Path="src/Modules/Catalog/Catalog.Application/Catalog.Application.csproj" />
     <Project Path="src/Modules/Catalog/Catalog.Domain/Catalog.Domain.csproj" />
     <Project Path="src/Modules/Catalog/Catalog.Infrastructure/Catalog.Infrastructure.csproj" />
+    <Project Path="src/Modules/Catalog/Catalog.IntegrationEvents/Catalog.IntegrationEvents.csproj" />
     <Project Path="src/Modules/Catalog/Catalog.UI/Catalog.UI.csproj" />
   </Folder>
   <Folder Name="/tests/">
