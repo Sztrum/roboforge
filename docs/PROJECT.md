@@ -53,7 +53,7 @@ classes; they are connected only by events.
 | Sales | `RobotConfigurationAggregate` | Aggregate | `AddPart(PartSnapshot)`, `RemovePart(PartId)`, `Validate()`, `Finalize()` |
 | Sales | `PartSnapshot` | Value object | copy of price and spec at the time the part was added |
 | Sales | `OrderAggregate` | Aggregate | `Place(configuration)`, `Confirm()`, `Cancel(reason)`, `MarkStageReached(stage)` |
-| Sales | `OrderStatusEnum` | Enum | Draft, Placed, Confirmed, InProduction, Shipped, Cancelled |
+| Sales | `OrderStatusEnum` | Enum | Placed, Confirmed, InProduction, Shipped, Cancelled (a draft is a `RobotConfigurationAggregate`) |
 | Production | `ProductionJobAggregate` | Aggregate | `Start()`, `CompleteStage(stage, by)`, `FailQa(reason)`, `Ship(trackingNo)` |
 | Production | `ProductionStageEnum` | Enum | Printing, Assembly, QaTests, Packing, Shipped |
 | Shared | `Money` | Value object | `Amount`, `Currency`, operators `+` and `*` |
@@ -81,7 +81,7 @@ Numbers are examples and may be changed (record the change here).
 | R5 | Price = sum of part prices + 15% assembly. Orders from 1000 PLN get 5% off. | `RobotConfigurationPricingPolicy` |
 | R6 | Lead time = longest part lead time + 2 days assembly + 1 day QA. | `LeadTime.Combine(...)` |
 | R7 | A discontinued part cannot be added to a new configuration. | `RobotConfigurationAggregate.AddPart()` |
-| R8 | An order can be cancelled only before production starts. | `OrderAggregate.Cancel()` |
+| R8 | An order can be cancelled only before production starts, i.e. while it is placed and not yet confirmed (confirming starts production). | `OrderAggregate.Cancel()` |
 | R9 | Production stages run strictly in order, no skipping. | `ProductionJobAggregate.CompleteStage()` |
 | R10 | Failed QA sends the job back to Assembly; after 2 failures the job is on hold pending a decision. | `ProductionJobAggregate.FailQa()` |
 
@@ -101,6 +101,10 @@ Value objects and aggregates guard their own invariants with `M…` (money), `L�
 | C5 | A part can be discontinued only once. | `PartAggregate.Discontinue()` |
 | S1 | A configuration that became an order cannot be changed or ordered again. | `RobotConfigurationAggregate` |
 | S2 | Only a part that is in a configuration can be removed from it. | `RobotConfigurationAggregate.RemovePart()` |
+| S3 | Only a placed order can be confirmed. | `OrderAggregate.Confirm()` |
+| S4 | A cancelled order cannot be cancelled again. | `OrderAggregate.Cancel()` |
+| S5 | Production progress is recorded only for a confirmed order or one in production. | `OrderAggregate` |
+| S6 | Each failed QA extends the order's lead time by assembly + QA (3 working days). | `OrderAggregate.RecordFailedQa()` |
 
 R2–R4 span several parts, so they live in the `RobotPartsCompatibilityPolicy` domain
 service, which returns a list of violations instead of throwing on the first
@@ -166,6 +170,7 @@ Mechanics:
 | POST | `/api/configurations/{id}/parts` | add a part to a configuration |
 | DELETE | `/api/configurations/{id}/parts/{partId}` | remove a part |
 | GET | `/api/configurations/{id}/quote` | validation + price + lead time |
+| GET | `/api/orders` | list orders, newest first |
 | POST | `/api/orders` | place an order from a configuration |
 | POST | `/api/orders/{id}/confirm` | confirm (starts production) |
 | POST | `/api/orders/{id}/cancel` | cancel |

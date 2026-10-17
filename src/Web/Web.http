@@ -124,3 +124,43 @@ GET {{Web_HostAddress}}/api/configurations/{{configurationId}}/quote
 DELETE {{Web_HostAddress}}/api/configurations/{{configurationId}}/parts/{{driveId}}
 
 ###
+
+### ---------- Sales: orders ----------
+
+# Place an order from a valid configuration (an invalid one → 422 with every violated rule)
+# @name placeOrder
+POST {{Web_HostAddress}}/api/orders
+Content-Type: application/json
+
+{
+  "configurationId": "{{configurationId}}"
+}
+
+###
+
+@orderId = {{placeOrder.response.body.$.id}}
+
+# Order details, production history and notes
+GET {{Web_HostAddress}}/api/orders/{{orderId}}
+
+###
+
+# All orders, newest first
+GET {{Web_HostAddress}}/api/orders
+
+###
+
+# Confirm: starts production
+POST {{Web_HostAddress}}/api/orders/{{orderId}}/confirm
+
+###
+
+# Cancel: only before confirmation, otherwise 422 with rule R8
+POST {{Web_HostAddress}}/api/orders/{{orderId}}/cancel
+Content-Type: application/json
+
+{
+  "reason": "Zmiana planów"
+}
+
+###

@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sales.Domain\Sales.Domain.csproj" />
+    <ProjectReference Include="..\Sales.IntegrationEvents\Sales.IntegrationEvents.csproj" />
     <ProjectReference Include="..\..\Catalog\Catalog.IntegrationEvents\Catalog.IntegrationEvents.csproj" />
     <ProjectReference Include="..\..\..\Shared\Shared.Application\Shared.Application.csproj" />
   </ItemGroup>

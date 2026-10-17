@@ -30,7 +30,7 @@ public class OfferFollowsCatalogTest(ApiWithPostgresAssemblyFixture fixture)
         using var client = fixture.CreateClient();
         var sensor = await client.StoreSensorAsync();
         await fixture.WaitUntilSalesOffersPartAsync(sensor.Id);
-        var configurationId = await client.BuildRobotAsync("Obudowa Ranger (PETG)", "Napęd Trail 12V", "Sterownik Pro 12V");
+        var configurationId = await client.BuildRobotAsync(RoboForgeApiTestSteps.RangerHousing, RoboForgeApiTestSteps.TrailDrive, RoboForgeApiTestSteps.ProElectronics);
         await client.AddPartAsync(configurationId, sensor.Id);
 
         await client.PostAsync($"/api/parts/{sensor.Id}/discontinue", null, CancellationToken);

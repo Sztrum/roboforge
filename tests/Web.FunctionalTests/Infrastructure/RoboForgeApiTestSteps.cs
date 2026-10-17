@@ -6,6 +6,7 @@ using RoboForge.Modules.Catalog.Application.Parts.Commands;
 using RoboForge.Modules.Catalog.Application.Parts.Resources;
 using RoboForge.Modules.Catalog.Domain.Parts.Enums;
 using RoboForge.Modules.Sales.Application.Configurations.Resources;
+using RoboForge.Modules.Sales.Application.Orders.Resources;
 using RoboForge.Modules.Sales.Domain.Parts;
 using RoboForge.Modules.Sales.Infrastructure.Database;
 
@@ -60,6 +61,38 @@ internal static class RoboForgeApiTestSteps
     public static async Task<RobotQuoteResource> ShowQuoteAsync(this HttpClient client, Guid configurationId) =>
         (await client.GetFromJsonAsync<RobotQuoteResource>(
             $"/api/configurations/{configurationId}/quote", ApiJsonSerializerOptions.Web, CancellationToken))!;
+
+    public const string RangerHousing = "Obudowa Ranger (PETG)";
+    public const string TrailDrive = "Napęd Trail 12V";
+    public const string ProElectronics = "Sterownik Pro 12V";
+    public const string Camera = "Kamera 5 MP";
+
+    public static Task<HttpResponseMessage> PlaceOrderAsync(this HttpClient client, Guid configurationId) =>
+        client.PostAsJsonAsync("/api/orders", new { configurationId }, CancellationToken);
+
+    /// <summary>Builds the compatible Ranger robot (788.90 PLN, 8 working days) and places an order for it.</summary>
+    public static async Task<OrderResource> PlaceRangerRobotOrderAsync(this HttpClient client)
+    {
+        var configurationId = await client.BuildRobotAsync(RangerHousing, TrailDrive, ProElectronics, Camera);
+        var response = await client.PlaceOrderAsync(configurationId);
+        response.StatusCode.ShouldBe(HttpStatusCode.Created);
+
+        return (await response.Content.ReadFromJsonAsync<OrderResource>(ApiJsonSerializerOptions.Web, CancellationToken))!;
+    }
+
+    public static async Task<OrderResource> ConfirmOrderAsync(this HttpClient client, Guid orderId)
+    {
+        var response = await client.PostAsync($"/api/orders/{orderId}/confirm", null, CancellationToken);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        return (await response.Content.ReadFromJsonAsync<OrderResource>(ApiJsonSerializerOptions.Web, CancellationToken))!;
+    }
+
+    public static Task<HttpResponseMessage> CancelOrderAsync(this HttpClient client, Guid orderId, string reason) =>
+        client.PostAsJsonAsync($"/api/orders/{orderId}/cancel", new { reason }, CancellationToken);
+
+    public static async Task<OrderResource> ShowOrderAsync(this HttpClient client, Guid orderId) =>
+        (await client.GetFromJsonAsync<OrderResource>($"/api/orders/{orderId}", ApiJsonSerializerOptions.Web, CancellationToken))!;
 
     /// <summary>Waits until Sales' copy of the offer has caught up with the catalog (it arrives through the outbox).</summary>
     public static Task WaitUntilSalesOffersPartAsync(
