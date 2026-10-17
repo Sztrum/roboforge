@@ -1,6 +1,9 @@
 using RoboForge.Modules.Catalog.Infrastructure;
 using RoboForge.Modules.Catalog.Infrastructure.Database;
 using RoboForge.Modules.Catalog.UI;
+using RoboForge.Modules.Sales.Infrastructure;
+using RoboForge.Modules.Sales.Infrastructure.Database;
+using RoboForge.Modules.Sales.UI;
 using RoboForge.Web.Database;
 using Scalar.AspNetCore;
 
@@ -10,12 +13,14 @@ builder.AddServiceDefaults();
 builder.AddApiHostServices();
 
 builder.AddCatalogModule();
+builder.AddSalesModule();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     await app.ApplyPendingMigrationsAsync<CatalogDbContext>();
+    await app.ApplyPendingMigrationsAsync<SalesDbContext>();
 }
 else
 {
@@ -36,5 +41,6 @@ app.Map("/", () => Results.Redirect("/scalar"));
 
 app.MapDefaultEndpoints();
 app.MapCatalogModuleEndpoints();
+app.MapSalesModuleEndpoints();
 
 await app.RunAsync();

@@ -8,8 +8,8 @@ namespace RoboForge.Architecture.Tests;
 /// </summary>
 internal static class ProjectAssemblies
 {
-    /// <summary>Modules that exist now; Sales and Production are added in their stages.</summary>
-    public static readonly string[] ExistingModules = ["Catalog"];
+    /// <summary>Modules that exist now; Production is added in its stage.</summary>
+    public static readonly string[] ExistingModules = ["Catalog", "Sales"];
 
     /// <summary>Every bounded context, including those not built yet, so isolation rules already name them.</summary>
     public static readonly string[] AllBoundedContexts = ["Catalog", "Sales", "Production"];

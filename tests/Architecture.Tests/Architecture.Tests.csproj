@@ -30,6 +30,11 @@
     <ProjectReference Include="..\..\src\Modules\Catalog\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Modules\Catalog\Catalog.UI\Catalog.UI.csproj" />
     <ProjectReference Include="..\..\src\Modules\Catalog\Catalog.IntegrationEvents\Catalog.IntegrationEvents.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Sales\Sales.Domain\Sales.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Sales\Sales.Application\Sales.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Sales\Sales.Infrastructure\Sales.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Sales\Sales.UI\Sales.UI.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Sales\Sales.IntegrationEvents\Sales.IntegrationEvents.csproj" />
   </ItemGroup>
 
 </Project>

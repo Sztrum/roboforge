@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using RoboForge.Modules.Sales.Infrastructure.Database;
 
 [assembly: AssemblyFixture(typeof(ApiWithPostgresAssemblyFixture))]
 
@@ -42,6 +44,28 @@ public sealed class ApiWithPostgresAssemblyFixture : IAsyncLifetime
         // Start the API once here: tests run in parallel, and two first calls to CreateClient
         // would otherwise start it twice and apply the migrations concurrently.
         _factory.StartServer();
+
+        await WaitUntilSalesOffersStarterCatalogAsync();
+    }
+
+    /// <summary>
+    /// The 12 seeded catalog parts reach Sales through the outbox shortly after start-up; scenario tests
+    /// that use them must not race that.
+    /// </summary>
+    private async Task WaitUntilSalesOffersStarterCatalogAsync()
+    {
+        const int StarterPartCount = 12;
+
+        await EventuallyConsistentAssertion.WaitUntilAsync(
+            async () =>
+            {
+                await using var scope = CreateServiceScope();
+                var salesDbContext = scope.ServiceProvider.GetRequiredService<SalesDbContext>();
+
+                return await salesDbContext.OfferedParts.CountAsync();
+            },
+            offeredPartCount => offeredPartCount >= StarterPartCount,
+            "Sales to offer the starter catalog");
     }
 
     public async ValueTask DisposeAsync()

@@ -234,6 +234,14 @@ events.
   The compatibility rules are checked only for parts present exactly once.
 - **R5 threshold** applies to parts plus assembly (the price the customer
   sees before the discount).
+- **Snapshots are JSON columns:** a configuration's `PartSnapshot` list and
+  an offered part's current offer are stored as `jsonb`
+  (`StoreAsJsonPropertyBuilderExtensions` in `Shared.Infrastructure`); they
+  are always read and written with their aggregate.
+- **Eventual consistency is visible:** a part created in Catalog can be
+  added to a configuration once Sales has processed its event (about 0.5 s);
+  until then the API answers 404. The functional-test fixture waits until
+  Sales offers the 12 starter parts before tests run.
 
 ## References
 

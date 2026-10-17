@@ -27,7 +27,7 @@ internal static class EventuallyConsistentAssertion
                 throw new TimeoutException($"Still waiting after {Timeout.TotalSeconds} s for: {expectation}. Last value: {value}");
             }
 
-            await Task.Delay(RetryDelay, TestContext.Current.CancellationToken);
+            await Task.Delay(RetryDelay);
         }
     }
 }

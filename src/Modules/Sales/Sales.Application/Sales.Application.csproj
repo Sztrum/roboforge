@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>RoboForge.Modules.Sales.Application</RootNamespace>
+    <AssemblyName>RoboForge.Modules.Sales.Application</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ardalis.GuardClauses" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sales.Domain\Sales.Domain.csproj" />
+    <ProjectReference Include="..\..\Catalog\Catalog.IntegrationEvents\Catalog.IntegrationEvents.csproj" />
+    <ProjectReference Include="..\..\..\Shared\Shared.Application\Shared.Application.csproj" />
+  </ItemGroup>
+
+</Project>
