@@ -164,3 +164,54 @@ Content-Type: application/json
 }
 
 ###
+
+### ---------- Production: workshop ----------
+# A job appears about half a second after an order is confirmed.
+
+# @name productionQueue
+GET {{Web_HostAddress}}/api/production/jobs
+
+###
+
+@jobId = {{productionQueue.response.body.$.items[0].id}}
+
+# Only jobs at one stage: Printing, Assembly, QaTests, Packing or Shipped
+GET {{Web_HostAddress}}/api/production/jobs?stage=Printing
+
+###
+
+# Complete the current stage (skipping one → 422 with rule R9)
+POST {{Web_HostAddress}}/api/production/jobs/{{jobId}}/complete-stage
+Content-Type: application/json
+
+{
+  "stage": "Printing",
+  "completedBy": "Ania (warsztat)"
+}
+
+###
+
+# Failed QA: back to Assembly; the second failure puts the job on hold (R10)
+POST {{Web_HostAddress}}/api/production/jobs/{{jobId}}/fail-qa
+Content-Type: application/json
+
+{
+  "reason": "Luźne mocowanie napędu"
+}
+
+###
+
+# Continue a held job from Assembly
+POST {{Web_HostAddress}}/api/production/jobs/{{jobId}}/release-hold
+
+###
+
+# Ship after packing
+POST {{Web_HostAddress}}/api/production/jobs/{{jobId}}/ship
+Content-Type: application/json
+
+{
+  "trackingNumber": "RF-2026-0001"
+}
+
+###

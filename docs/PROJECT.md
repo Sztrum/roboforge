@@ -54,7 +54,7 @@ classes; they are connected only by events.
 | Sales | `PartSnapshot` | Value object | copy of price and spec at the time the part was added |
 | Sales | `OrderAggregate` | Aggregate | `Place(configuration)`, `Confirm()`, `Cancel(reason)`, `MarkStageReached(stage)` |
 | Sales | `OrderStatusEnum` | Enum | Placed, Confirmed, InProduction, Shipped, Cancelled (a draft is a `RobotConfigurationAggregate`) |
-| Production | `ProductionJobAggregate` | Aggregate | `Start()`, `CompleteStage(stage, by)`, `FailQa(reason)`, `Ship(trackingNo)` |
+| Production | `ProductionJobAggregate` | Aggregate | `StartForOrder(order, parts)`, `CompleteStage(stage, by)`, `FailQa(reason)`, `ReleaseFromHold()`, `Ship(trackingNo)` |
 | Production | `ProductionStageEnum` | Enum | Printing, Assembly, QaTests, Packing, Shipped |
 | Shared | `Money` | Value object | `Amount`, `Currency`, operators `+` and `*` |
 | Shared | `LeadTime` | Value object | working days, `Combine(...)` |
@@ -86,7 +86,7 @@ Numbers are examples and may be changed (record the change here).
 | R10 | Failed QA sends the job back to Assembly; after 2 failures the job is on hold pending a decision. | `ProductionJobAggregate.FailQa()` |
 
 Value objects and aggregates guard their own invariants with `M…` (money), `L…` (lead time),
-`C…` (catalog), `S…` (sales) and similar rule IDs, returned the same way as R-rules:
+`C…` (catalog), `S…` (sales), `P…` (production) and similar rule IDs, returned the same way as R-rules:
 
 | # | Rule | Lives in |
 | --- | --- | --- |
@@ -105,6 +105,10 @@ Value objects and aggregates guard their own invariants with `M…` (money), `L�
 | S4 | A cancelled order cannot be cancelled again. | `OrderAggregate.Cancel()` |
 | S5 | Production progress is recorded only for a confirmed order or one in production. | `OrderAggregate` |
 | S6 | Each failed QA extends the order's lead time by assembly + QA (3 working days). | `OrderAggregate.RecordFailedQa()` |
+| P1 | The shipping stage is completed by shipping the robot with a tracking number. | `ProductionJobAggregate.CompleteStage()` |
+| P2 | QA can fail only while the job is at the QA stage. | `ProductionJobAggregate.FailQa()` |
+| P3 | Only a job on hold can be released from hold. | `ProductionJobAggregate.ReleaseFromHold()` |
+| P4 | A shipped job cannot change. | `ProductionJobAggregate` |
 
 R2–R4 span several parts, so they live in the `RobotPartsCompatibilityPolicy` domain
 service, which returns a list of violations instead of throwing on the first
@@ -178,6 +182,9 @@ Mechanics:
 | GET | `/api/production/jobs?stage=` | workshop queue |
 | POST | `/api/production/jobs/{id}/complete-stage` | complete a stage |
 | POST | `/api/production/jobs/{id}/fail-qa` | failed QA |
+| POST | `/api/production/jobs/{id}/release-hold` | continue a job held after two failed QA checks |
+| POST | `/api/production/jobs/{id}/ship` | ship the packed robot with a tracking number |
+| GET | `/api/production/jobs/{id}` | show one job |
 
 Domain errors: `ProblemDetails` (RFC 9457), status 422, list of violated
 rules, e.g. `R2: Napęd nie pasuje do mocowania obudowy`.

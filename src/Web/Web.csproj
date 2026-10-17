@@ -15,6 +15,8 @@
     <ProjectReference Include="..\Modules\Catalog\Catalog.UI\Catalog.UI.csproj" />
     <ProjectReference Include="..\Modules\Sales\Sales.Infrastructure\Sales.Infrastructure.csproj" />
     <ProjectReference Include="..\Modules\Sales\Sales.UI\Sales.UI.csproj" />
+    <ProjectReference Include="..\Modules\Production\Production.Infrastructure\Production.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Production\Production.UI\Production.UI.csproj" />
   </ItemGroup>
 
   <ItemGroup>
