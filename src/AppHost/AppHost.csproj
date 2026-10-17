@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Shared\Shared.Hosting\Shared.Hosting.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\Web\Web.csproj" />
+    <ProjectReference Include="..\Frontend\Frontend.csproj" />
   </ItemGroup>
 
 </Project>

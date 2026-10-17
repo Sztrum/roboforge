@@ -41,6 +41,16 @@ public class ModuleIsolationArchitectureTest
     }
 
     [Fact]
+    public void Frontend_ShouldNotDependOn_AnyModule()
+    {
+        var result = Types.InAssembly(FrontendAssembly)
+            .ShouldNot().HaveDependencyOn("RoboForge.Modules")
+            .GetResult();
+
+        result.IsSuccessful.ShouldBeTrue(ListViolatingTypes(result));
+    }
+
+    [Fact]
     public void SharedCode_ShouldNotDependOn_AnyModule()
     {
         var result = Types.InAssemblies(SharedAssemblies)

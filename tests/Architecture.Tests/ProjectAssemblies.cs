@@ -31,6 +31,9 @@ internal static class ProjectAssemblies
         Assembly.Load("RoboForge.Shared.IntegrationEvents"),
     ];
 
+    /// <summary>The Blazor frontend, which may talk to the modules only over the HTTP API.</summary>
+    public static readonly Assembly FrontendAssembly = Assembly.Load("RoboForge.Frontend");
+
     public static Assembly ModuleLayer(string module, string layer) =>
         Assembly.Load($"RoboForge.Modules.{module}.{layer}");
 

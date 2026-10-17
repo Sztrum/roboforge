@@ -8,7 +8,7 @@ var database = builder
     .WithLifetime(ContainerLifetime.Persistent)
     .AddDatabase(AspireResourceNames.Database);
 
-builder.AddProject<Projects.Web>(AspireResourceNames.WebApi)
+var webApi = builder.AddProject<Projects.Web>(AspireResourceNames.WebApi)
     .WithReference(database)
     .WaitFor(database)
     .WithExternalHttpEndpoints()
@@ -18,5 +18,11 @@ builder.AddProject<Projects.Web>(AspireResourceNames.WebApi)
         url.DisplayText = "Scalar API Reference";
         url.Url = "/scalar";
     });
+
+builder.AddProject<Projects.Frontend>(AspireResourceNames.Frontend)
+    .WithReference(webApi)
+    .WaitFor(webApi)
+    .WithExternalHttpEndpoints()
+    .WithAspNetCoreEnvironment();
 
 await builder.Build().RunAsync();

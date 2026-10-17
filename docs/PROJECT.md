@@ -230,7 +230,9 @@ awaiting the user's review. Do not start the next stage without approval.
 5. **Production** — `ProductionJobAggregate` created from `OrderConfirmedEvent`, stages
    (R9), failed QA (R10), events back to Sales.
 6. **Demo polish** — README with diagram, demo seed data, `.http` scenario
-   file, optional simple Blazor frontend.
+   file, optional simple Blazor frontend. Decision (owner, 2026-10-17): build
+   the simple Blazor frontend (catalog, configurator, orders, workshop); the
+   test environment is local only (Aspire on the developer machine).
 
 ## Demo scenario (~10 minutes)
 
@@ -245,6 +247,6 @@ awaiting the user's review. Do not start the next stage without approval.
 6. Try to cancel an order in production → refused.
 7. Show the green CI pipeline and the architecture test.
 
-**Later extensions:** RabbitMQ + MassTransit, Blazor frontend with robot
-preview, login with Customer/Workshop roles, part inventory with
+**Later extensions:** RabbitMQ + MassTransit, robot preview in the
+frontend, login with Customer/Workshop roles, part inventory with
 reservations, Stripe test-mode payments.

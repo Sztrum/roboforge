@@ -1,0 +1,161 @@
+@page "/configurator"
+@page "/configurator/{ConfigurationId:guid}"
+@inject RoboForgeApiHttpClient Api
+@inject NavigationManager Navigation
+
+<PageTitle>Konfigurator – RoboForge</PageTitle>
+
+<h1>Konfigurator robota</h1>
+
+<ApiErrorAlert Error="_error" />
+
+@if (ConfigurationId is null)
+{
+    <p>Zacznij od pustej konfiguracji i dodawaj części. Reguły sprawdzamy na bieżąco.</p>
+    <button class="primary" @onclick="StartConfigurationAsync">Nowa konfiguracja</button>
+}
+else if (_configuration is null || _parts is null)
+{
+    <p>Ładowanie…</p>
+}
+else
+{
+    <div class="columns">
+        <section>
+            <h2>Dodaj część</h2>
+            @foreach (var category in _parts.Where(part => !part.IsDiscontinued).GroupBy(part => part.Category))
+            {
+                <h3>@PolishDisplayNames.Category(category.Key)</h3>
+                <ul class="part-picker">
+                    @foreach (var part in category)
+                    {
+                        <li>
+                            <span>@part.Name <small>@PolishDisplayNames.Price(part.PriceAmount) · @part.WeightGrams g</small></span>
+                            <button disabled="@IsOrdered" @onclick="() => AddPartAsync(part.Id)">Dodaj</button>
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+
+        <section>
+            <h2>Twój robot</h2>
+            @if (_configuration.Parts.Count == 0)
+            {
+                <p>Brak części.</p>
+            }
+            else
+            {
+                <ul class="robot-parts">
+                    @foreach (var part in _configuration.Parts)
+                    {
+                        <li class="@(part.IsDiscontinued ? "discontinued" : "")">
+                            <span><strong>@PolishDisplayNames.Category(part.Category):</strong> @part.Name</span>
+                            <button class="link" disabled="@IsOrdered" @onclick="() => RemovePartAsync(part.PartId)">Usuń</button>
+                        </li>
+                    }
+                </ul>
+            }
+
+            @if (_quote is not null)
+            {
+                <h2>Wycena</h2>
+                @if (_quote.IsValid)
+                {
+                    <p class="ok">✔ Konfiguracja spełnia wszystkie reguły.</p>
+                }
+                else
+                {
+                    <ul class="violations">
+                        @foreach (var violation in _quote.Violations)
+                        {
+                            <li><strong>@violation.Rule</strong> @violation.Message</li>
+                        }
+                    </ul>
+                }
+
+                <table class="quote">
+                    <tr><td>Części</td><td class="number">@PolishDisplayNames.Price(_quote.PartsPriceAmount)</td></tr>
+                    <tr><td>Montaż (15%)</td><td class="number">@PolishDisplayNames.Price(_quote.AssemblyPriceAmount)</td></tr>
+                    <tr><td>Rabat (5% od 1000 zł)</td><td class="number">− @PolishDisplayNames.Price(_quote.DiscountAmount)</td></tr>
+                    <tr class="total"><td>Razem</td><td class="number">@PolishDisplayNames.Price(_quote.TotalPriceAmount)</td></tr>
+                    <tr><td>Czas realizacji</td><td class="number">@_quote.LeadTimeWorkingDays dni roboczych</td></tr>
+                </table>
+
+                @if (IsOrdered)
+                {
+                    <p>Ta konfiguracja została już zamówiona.</p>
+                }
+                else
+                {
+                    <button class="primary" @onclick="PlaceOrderAsync">Złóż zamówienie</button>
+                }
+            }
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid? ConfigurationId { get; set; }
+
+    private IReadOnlyList<PartDto>? _parts;
+    private ConfigurationDto? _configuration;
+    private QuoteDto? _quote;
+    private ApiRequestRejectedException? _error;
+
+    private bool IsOrdered => _configuration?.Status == "Ordered";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ConfigurationId is not { } configurationId)
+        {
+            return;
+        }
+
+        await RunAsync(async () =>
+        {
+            _parts ??= (await Api.IndexPartsAsync(CancellationToken.None)).Items;
+            _configuration = await Api.ShowConfigurationAsync(configurationId, CancellationToken.None);
+            _quote = await Api.ShowQuoteAsync(configurationId, CancellationToken.None);
+        });
+    }
+
+    private Task StartConfigurationAsync() => RunAsync(async () =>
+    {
+        var configuration = await Api.StoreConfigurationAsync(CancellationToken.None);
+        Navigation.NavigateTo($"configurator/{configuration.Id}");
+    });
+
+    private Task AddPartAsync(Guid partId) => RunAsync(async () =>
+    {
+        _configuration = await Api.AddPartAsync(ConfigurationId!.Value, partId, CancellationToken.None);
+        _quote = await Api.ShowQuoteAsync(ConfigurationId.Value, CancellationToken.None);
+    });
+
+    private Task RemovePartAsync(Guid partId) => RunAsync(async () =>
+    {
+        _configuration = await Api.RemovePartAsync(ConfigurationId!.Value, partId, CancellationToken.None);
+        _quote = await Api.ShowQuoteAsync(ConfigurationId.Value, CancellationToken.None);
+    });
+
+    private Task PlaceOrderAsync() => RunAsync(async () =>
+    {
+        var order = await Api.PlaceOrderAsync(ConfigurationId!.Value, CancellationToken.None);
+        Navigation.NavigateTo($"orders/{order.Id}");
+    });
+
+    private async Task RunAsync(Func<Task> apiCall)
+    {
+        _error = null;
+
+        try
+        {
+            await apiCall();
+        }
+        catch (ApiRequestRejectedException exception)
+        {
+            _error = exception;
+        }
+    }
+}

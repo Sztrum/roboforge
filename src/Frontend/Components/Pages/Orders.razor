@@ -1,0 +1,60 @@
+@page "/orders"
+@inject RoboForgeApiHttpClient Api
+
+<PageTitle>Zamówienia – RoboForge</PageTitle>
+
+<h1>Zamówienia</h1>
+
+<ApiErrorAlert Error="_error" />
+
+@if (_orders is null)
+{
+    <p>Ładowanie…</p>
+}
+else if (_orders.Count == 0)
+{
+    <p>Nie ma jeszcze zamówień. <a href="configurator">Zbuduj robota</a>.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Złożone</th>
+                <th>Status</th>
+                <th class="number">Kwota</th>
+                <th class="number">Termin</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in _orders)
+            {
+                <tr>
+                    <td>@PolishDisplayNames.LocalTime(order.PlacedOnUtc)</td>
+                    <td><span class="badge status-@order.Status">@PolishDisplayNames.OrderStatus(order.Status)</span></td>
+                    <td class="number">@PolishDisplayNames.Price(order.TotalPriceAmount)</td>
+                    <td class="number">@order.LeadTimeWorkingDays dni rob.</td>
+                    <td><a href="orders/@order.Id">Szczegóły</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IReadOnlyList<OrderDto>? _orders;
+    private ApiRequestRejectedException? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _orders = (await Api.IndexOrdersAsync(CancellationToken.None)).Items;
+        }
+        catch (ApiRequestRejectedException exception)
+        {
+            _error = exception;
+        }
+    }
+}
