@@ -215,6 +215,26 @@ events.
   requests used to start it twice and race the migrations) and wait for
   outbox effects with `EventuallyConsistentAssertion` instead of sleeping.
 
+## Sales domain: configurator (stage 3, 2026-10-17)
+
+- **Sales keeps its own copy of the offer** (`OfferedPartAggregate`, keyed
+  by `CatalogPartId`), updated from Catalog's integration events. Adding a
+  part to a configuration takes a `PartSnapshot` of that copy, so Sales never
+  asks Catalog anything at request time. Sales has its own
+  `PartCategoryEnum` and `MountTypeEnum`; the contracts carry their names.
+- **Domain services are static classes** (`RobotPartsCompatibilityPolicy`,
+  `RobotConfigurationPricingPolicy`): they hold no state and the analyzers
+  (CA1822/S2325) require static members. The aggregate calls them directly.
+- **One exception, many violations:** `DomainException` carries a list of
+  `RuleViolation`s. Single-rule exceptions keep their one rule;
+  `RobotConfigurationIsNotValidException` carries everything `Validate()`
+  found, and the API returns all rule IDs in the 422 `rules` array.
+- **R1 is checked by `Validate()`, not by `AddPart`,** so a configuration can
+  be built in any order and the customer sees every missing part at once.
+  The compatibility rules are checked only for parts present exactly once.
+- **R5 threshold** applies to parts plus assembly (the price the customer
+  sees before the discount).
+
 ## References
 
 - Solution template: https://github.com/jasontaylordev/CleanArchitecture

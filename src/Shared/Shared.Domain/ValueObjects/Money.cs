@@ -38,6 +38,17 @@ public sealed record Money
         return new Money(left.Amount + right.Amount, left.Currency);
     }
 
+    /// <summary>Subtracts an amount in the same currency (M3); the result cannot be negative (M1).</summary>
+    public static Money operator -(Money left, Money right)
+    {
+        if (left.Currency != right.Currency)
+        {
+            throw new MoneyWithDifferentCurrencyCannotBeSubtractedException(left.Currency, right.Currency);
+        }
+
+        return new Money(left.Amount - right.Amount, left.Currency);
+    }
+
     /// <summary>
     /// Multiplies by a quantity (3 sensors) or a factor (1.15 for assembly). The result goes through
     /// the constructor, so it is rounded to whole grosze (M2) and cannot be negative (M1).

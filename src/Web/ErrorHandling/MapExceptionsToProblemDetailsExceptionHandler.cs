@@ -8,7 +8,7 @@ namespace RoboForge.Web.ErrorHandling;
 /// <summary>
 /// Converts well-known exceptions into RFC 9457 <see cref="ProblemDetails"/> responses,
 /// mapping <see cref="RequestValidationFailedException"/> → 400, <see cref="NotFoundException"/> → 404
-/// and <see cref="DomainException"/> → 422 with the violated rule ID.
+/// and <see cref="DomainException"/> → 422 with every violated rule ID.
 /// Unrecognised exceptions are not handled and fall through to the default middleware.
 /// </summary>
 public sealed class MapExceptionsToProblemDetailsExceptionHandler : IExceptionHandler
@@ -34,8 +34,8 @@ public sealed class MapExceptionsToProblemDetailsExceptionHandler : IExceptionHa
                 Status = StatusCodes.Status422UnprocessableEntity,
                 Type = "https://tools.ietf.org/html/rfc9110#section-15.5.21",
                 Title = "A business rule was violated.",
-                Detail = $"{de.Rule}: {de.Message}",
-                Extensions = { ["rules"] = new[] { de.Rule } }
+                Detail = string.Join("; ", de.Violations),
+                Extensions = { ["rules"] = de.Violations.Select(violation => violation.Rule).ToArray() }
             },
             _ => null
         };
