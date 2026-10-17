@@ -33,9 +33,17 @@ public class MoneyCreationTest
     [Fact]
     public void Equality_WithSameAmountAndCurrency_IsTrue()
     {
-        var first = new Money(10m, "PLN");
-        var second = new Money(10m, "PLN");
+        var tenZlotys = new Money(10m, "PLN");
+        var anotherTenZlotys = new Money(10m, "PLN");
 
-        first.ShouldBe(second);
+        tenZlotys.ShouldBe(anotherTenZlotys);
+    }
+
+    [Fact]
+    public void Zero_WithCurrency_ReturnsZeroAmountInThatCurrency()
+    {
+        var zeroZlotys = Money.Zero("PLN");
+
+        zeroZlotys.ShouldBe(new Money(0m, "PLN"));
     }
 }
