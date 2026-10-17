@@ -154,6 +154,7 @@ Mechanics:
 | Method | Path | Action |
 | --- | --- | --- |
 | GET | `/api/parts?category=` | list catalog parts |
+| GET | `/api/parts/{id}` | show one part |
 | POST | `/api/parts` | add a part |
 | PUT | `/api/parts/{id}/price` | change price |
 | POST | `/api/parts/{id}/discontinue` | discontinue a part |

@@ -8,6 +8,9 @@ namespace RoboForge.Shared.Domain.ValueObjects;
 /// </summary>
 public sealed record Money
 {
+    /// <summary>The MVP sells in Polish zloty only, but every amount still carries its currency.</summary>
+    public const string DefaultCurrency = "PLN";
+
     private const int DecimalPlacesOfWholeGrosze = 2;
 
     public Money(decimal amount, string currency)
