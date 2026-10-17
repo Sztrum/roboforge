@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+
 [assembly: AssemblyFixture(typeof(ApiWithPostgresAssemblyFixture))]
 
 namespace RoboForge.Web.FunctionalTests.Infrastructure;
@@ -12,6 +14,9 @@ public sealed class ApiWithPostgresAssemblyFixture : IAsyncLifetime
     private ApiWithTestDatabaseWebApplicationFactory? _factory;
 
     public HttpClient CreateClient() => _factory!.CreateClient();
+
+    /// <summary>A DI scope of the running API, to look into a module's database from a test.</summary>
+    public AsyncServiceScope CreateServiceScope() => _factory!.Services.CreateAsyncScope();
 
     public async ValueTask InitializeAsync()
     {
@@ -33,6 +38,10 @@ public sealed class ApiWithPostgresAssemblyFixture : IAsyncLifetime
         var connectionString = (await _app.GetConnectionStringAsync(AspireResourceNames.Database, cancellationToken))!;
 
         _factory = new ApiWithTestDatabaseWebApplicationFactory(connectionString);
+
+        // Start the API once here: tests run in parallel, and two first calls to CreateClient
+        // would otherwise start it twice and apply the migrations concurrently.
+        _factory.StartServer();
     }
 
     public async ValueTask DisposeAsync()

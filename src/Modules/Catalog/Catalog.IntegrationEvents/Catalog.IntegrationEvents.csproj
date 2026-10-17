@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>RoboForge.Modules.Catalog.IntegrationEvents</RootNamespace>
+    <AssemblyName>RoboForge.Modules.Catalog.IntegrationEvents</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\Shared.IntegrationEvents\Shared.IntegrationEvents.csproj" />
+  </ItemGroup>
+
+</Project>

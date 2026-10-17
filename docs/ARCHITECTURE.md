@@ -124,9 +124,8 @@ tests/
   A new module is added to `ProjectAssemblies.ExistingModules` and referenced
   in `Architecture.Tests.csproj`. Verified to fail on a deliberate EF Core
   reference in `Catalog.Domain`.
-- **Integration events** between modules (stage 4) will need contracts both
-  sides can reference; the reference repository uses a separate
-  `{Module}.IntegrationEvents` project per module. Decided with the outbox.
+- **Integration events** between modules: see "Outbox and integration
+  events" below.
 
 ## Continuous integration (stage 1, 2026-10-08)
 
@@ -181,6 +180,40 @@ with `Command`/`Query`/`Handler`. The full table lives in the agent rules
 - **JSON enums are names** (`"Drive"`), configured once in the API host.
 - **OpenAPI tags** drop the `Api` prefix and `EndpointGroup` suffix of the
   endpoint-group class (`ApiPartEndpointGroup` → `Part`).
+
+## Outbox and integration events (2026-10-17)
+
+Brought forward from stage 4 to the start of stage 3, because Sales builds
+`PartSnapshot`s from a copy of the catalog it keeps up to date from Catalog's
+events.
+
+- **Contracts:** each module publishes integration events from its own
+  `{Module}.IntegrationEvents` project (as in the reference repository):
+  records of plain values deriving from `IntegrationEvent`
+  (`Shared.IntegrationEvents`, a Mediator `INotification`). Another module
+  may reference this project and nothing else of the module; architecture
+  tests enforce it, and the contracts reference no module layer.
+- **Domain events stay inside the module.** Each module has a
+  `{Module}DomainEventToIntegrationEventMapper` in its Application layer that
+  decides which domain events leave the module and how they look outside.
+- **Outbox (`Shared.Infrastructure`):** `WriteIntegrationEventsToOutboxSaveChangesInterceptor`
+  collects the domain events of tracked aggregates during `SaveChanges`, maps
+  them and adds `OutboxMessage` rows (`{schema}.OutboxMessages`, JSON
+  content) in the same transaction. `PublishOutboxMessagesHostedService<TDbContext>`
+  polls each module's outbox every 0.5 s and publishes the events
+  in-process through Mediator, so the subscribing module's
+  `INotificationHandler`s run. Replacing it with RabbitMQ + MassTransit
+  later touches only this publisher.
+- **Delivery is at least once and not retried on failure:** a message whose
+  handler throws is marked processed with its `Error` kept for inspection.
+  Handlers are written to be idempotent. Good enough for the MVP; an inbox
+  table and retries come with a real broker.
+- **Mediator's `MSG0005`** (a message without a handler) is suppressed in
+  `Web`: an integration event without a subscriber is valid, and publishing
+  it does nothing.
+- **Functional tests** start the API once per test assembly (parallel first
+  requests used to start it twice and race the migrations) and wait for
+  outbox effects with `EventuallyConsistentAssertion` instead of sleeping.
 
 ## References
 

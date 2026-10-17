@@ -23,6 +23,8 @@ public static class ApiHostServiceRegistration
             ];
         });
 
+        builder.Services.AddSingleton(TimeProvider.System);
+
         builder.Services.AddExceptionHandler<MapExceptionsToProblemDetailsExceptionHandler>();
 
         // Customise default API behaviour

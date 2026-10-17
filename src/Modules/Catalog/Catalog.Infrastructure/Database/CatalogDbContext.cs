@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RoboForge.Modules.Catalog.Application.Database;
 using RoboForge.Modules.Catalog.Domain.Parts;
+using RoboForge.Shared.Infrastructure.Outbox;
 
 namespace RoboForge.Modules.Catalog.Infrastructure.Database;
 
@@ -18,5 +19,6 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
     {
         modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(CatalogDbContext).Assembly);
+        modelBuilder.ApplyConfiguration(new OutboxMessageEntityTypeConfiguration());
     }
 }
