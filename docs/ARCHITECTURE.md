@@ -258,6 +258,27 @@ events.
 - **Production progress reaches the order only through events** (stage 5):
   completed stages, failed QA (a note and +3 working days, S6) and shipping.
 
+## Production (stage 5, 2026-10-17)
+
+- **A job starts when Sales confirms an order** (`OrderConfirmedIntegrationEvent`
+  → `ProductionJobAggregate.StartForOrder`), at the printing stage; there is
+  no separate start step. The handler is idempotent (one job per order,
+  unique index on `OrderId`). Production keeps only the order ID and the part
+  names it needs (`SalesOrderId`, `ProductionPart`).
+- **Stages run in enum order** (`Printing → Assembly → QaTests → Packing →
+  Shipped`); `CompleteStage` must name the current stage (R9). The last
+  stage ends with `Ship(trackingNumber)` (P1), so the tracking number is
+  always known.
+- **Failed QA** sends the job back to assembly; from the second failure the
+  job is on hold (R10) until `ReleaseFromHold()`. Every further failure holds
+  it again, so each one needs a decision.
+- **Sales follows production only through events:**
+  `ProductionStageCompletedIntegrationEvent` → `MarkStageReached`,
+  `QaFailedIntegrationEvent` → note + longer lead time (S6),
+  `RobotShippedIntegrationEvent` → `MarkShipped`. Each module has its own
+  enum of stages; the contracts carry stage names.
+- **`DemoScenarioTest`** runs the documented demo end to end through the API.
+
 ## References
 
 - Solution template: https://github.com/jasontaylordev/CleanArchitecture

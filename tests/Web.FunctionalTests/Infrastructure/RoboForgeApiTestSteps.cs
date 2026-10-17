@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using RoboForge.Modules.Catalog.Application.Parts.Commands;
 using RoboForge.Modules.Catalog.Application.Parts.Resources;
 using RoboForge.Modules.Catalog.Domain.Parts.Enums;
+using RoboForge.Modules.Production.Application.Jobs.Resources;
+using RoboForge.Modules.Production.Domain.Jobs.Enums;
 using RoboForge.Modules.Sales.Application.Configurations.Resources;
 using RoboForge.Modules.Sales.Application.Orders.Resources;
 using RoboForge.Modules.Sales.Domain.Parts;
@@ -93,6 +95,51 @@ internal static class RoboForgeApiTestSteps
 
     public static async Task<OrderResource> ShowOrderAsync(this HttpClient client, Guid orderId) =>
         (await client.GetFromJsonAsync<OrderResource>($"/api/orders/{orderId}", ApiJsonSerializerOptions.Web, CancellationToken))!;
+
+    public const string Technician = "Ania (warsztat)";
+
+    /// <summary>Waits until Production has started the job for a confirmed order (it arrives through the Sales outbox).</summary>
+    public static async Task<ProductionJobResource> WaitForProductionJobOfOrderAsync(this HttpClient client, Guid orderId)
+    {
+        var jobs = await EventuallyConsistentAssertion.WaitUntilAsync(
+            async () => (await client.GetFromJsonAsync<CollectionProductionJobResource>(
+                "/api/production/jobs", ApiJsonSerializerOptions.Web, CancellationToken))!,
+            queue => queue.Items.Any(job => job.OrderId == orderId),
+            $"a production job for order {orderId}");
+
+        return jobs.Items.Single(job => job.OrderId == orderId);
+    }
+
+    /// <summary>Places and confirms the Ranger robot order and returns the production job started for it.</summary>
+    public static async Task<ProductionJobResource> StartRangerRobotProductionAsync(this HttpClient client)
+    {
+        var order = await client.PlaceRangerRobotOrderAsync();
+        await client.ConfirmOrderAsync(order.Id);
+
+        return await client.WaitForProductionJobOfOrderAsync(order.Id);
+    }
+
+    public static Task<HttpResponseMessage> CompleteStageAsync(this HttpClient client, Guid jobId, ProductionStageEnum stage) =>
+        client.PostAsJsonAsync(
+            $"/api/production/jobs/{jobId}/complete-stage", new { stage, completedBy = Technician }, ApiJsonSerializerOptions.Web, CancellationToken);
+
+    public static async Task CompleteStagesAsync(this HttpClient client, Guid jobId, params ProductionStageEnum[] stages)
+    {
+        foreach (var stage in stages)
+        {
+            (await client.CompleteStageAsync(jobId, stage)).StatusCode.ShouldBe(HttpStatusCode.OK);
+        }
+    }
+
+    public static Task<HttpResponseMessage> FailQaAsync(this HttpClient client, Guid jobId, string reason) =>
+        client.PostAsJsonAsync($"/api/production/jobs/{jobId}/fail-qa", new { reason }, CancellationToken);
+
+    public static Task<HttpResponseMessage> ShipAsync(this HttpClient client, Guid jobId, string trackingNumber) =>
+        client.PostAsJsonAsync($"/api/production/jobs/{jobId}/ship", new { trackingNumber }, CancellationToken);
+
+    /// <summary>Waits until the order shows what Production reported (it arrives through the Production outbox).</summary>
+    public static Task<OrderResource> WaitForOrderAsync(this HttpClient client, Guid orderId, Func<OrderResource, bool> isExpected, string expectation) =>
+        EventuallyConsistentAssertion.WaitUntilAsync(() => client.ShowOrderAsync(orderId), isExpected, expectation);
 
     /// <summary>Waits until Sales' copy of the offer has caught up with the catalog (it arrives through the outbox).</summary>
     public static Task WaitUntilSalesOffersPartAsync(

@@ -13,6 +13,13 @@
     <Project Path="src/ServiceDefaults/ServiceDefaults.csproj" />
     <Project Path="src/Web/Web.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Production/">
+    <Project Path="src/Modules/Production/Production.Application/Production.Application.csproj" />
+    <Project Path="src/Modules/Production/Production.Domain/Production.Domain.csproj" />
+    <Project Path="src/Modules/Production/Production.Infrastructure/Production.Infrastructure.csproj" />
+    <Project Path="src/Modules/Production/Production.IntegrationEvents/Production.IntegrationEvents.csproj" />
+    <Project Path="src/Modules/Production/Production.UI/Production.UI.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Sales/">
     <Project Path="src/Modules/Sales/Sales.Application/Sales.Application.csproj" />
     <Project Path="src/Modules/Sales/Sales.Domain/Sales.Domain.csproj" />
@@ -44,6 +51,9 @@
   <Folder Name="/tests/Modules/" />
   <Folder Name="/tests/Modules/Catalog/">
     <Project Path="tests/Modules/Catalog/Catalog.Domain.UnitTests/Catalog.Domain.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Modules/Production/">
+    <Project Path="tests/Modules/Production/Production.Domain.UnitTests/Production.Domain.UnitTests.csproj" />
   </Folder>
   <Folder Name="/tests/Modules/Sales/">
     <Project Path="tests/Modules/Sales/Sales.Domain.UnitTests/Sales.Domain.UnitTests.csproj" />
