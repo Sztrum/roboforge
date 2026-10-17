@@ -9,6 +9,11 @@ public static class AspireResourceNames
     public const string WebApi = "webapi";
 
     /// <summary>
+    /// The name of the Blazor frontend, which calls <see cref="WebApi"/> through service discovery.
+    /// </summary>
+    public const string Frontend = "frontend";
+
+    /// <summary>
     /// The name of the Database Server service.
     /// This service is responsible for hosting the database server (e.g., PostgreSQL, SQL Server, or SQLite).
     /// </summary>

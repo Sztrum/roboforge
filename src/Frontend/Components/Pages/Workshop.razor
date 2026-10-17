@@ -1,0 +1,150 @@
+@page "/workshop"
+@implements IDisposable
+@inject RoboForgeApiHttpClient Api
+
+<PageTitle>Warsztat – RoboForge</PageTitle>
+
+<h1>Warsztat</h1>
+
+<p>
+    Pracownik: <input @bind="_technician" />
+    <small>Etapy idą po kolei (R9); dwie nieudane kontrole jakości wstrzymują zlecenie (R10).</small>
+</p>
+
+<ApiErrorAlert Error="_error" />
+
+@if (_jobs is null)
+{
+    <p>Ładowanie…</p>
+}
+else if (_jobs.Count == 0)
+{
+    <p>Kolejka jest pusta. Zlecenie pojawia się po potwierdzeniu zamówienia.</p>
+}
+else
+{
+    <div class="jobs">
+        @foreach (var job in _jobs)
+        {
+            <article class="job status-@job.Status">
+                <header>
+                    <strong>Zlecenie dla zamówienia <a href="orders/@job.OrderId">@job.OrderId.ToString()[..8]</a></strong>
+                    <span class="badge">@PolishDisplayNames.JobStatus(job.Status)</span>
+                </header>
+
+                <ol class="stages">
+                    @foreach (var stage in Stages)
+                    {
+                        <li class="@StageCssClass(job, stage)">@PolishDisplayNames.Stage(stage)</li>
+                    }
+                </ol>
+
+                <p><small>@string.Join(", ", job.Parts.Select(part => part.Name))</small></p>
+                @if (job.QaFailures.Count != 0)
+                {
+                    <p class="warning">Nieudane kontrole: @string.Join("; ", job.QaFailures.Select(failure => failure.Reason))</p>
+                }
+
+                @if (job.Status == "Shipped")
+                {
+                    <p>Wysłano, numer przesyłki: <strong>@job.TrackingNumber</strong></p>
+                }
+                else if (job.Status == "OnHold")
+                {
+                    <button class="primary" @onclick="() => ReleaseAsync(job.Id)">Decyzja: kontynuuj od montażu</button>
+                    <button @onclick="() => CompleteAsync(job.Id, job.CurrentStage)" title="Pokazuje regułę R10">Spróbuj kontynuować bez decyzji</button>
+                }
+                else if (job.CurrentStage == "Shipped")
+                {
+                    <button class="primary" @onclick="() => ShipAsync(job.Id)">Wyślij</button>
+                }
+                else
+                {
+                    <button class="primary" @onclick="() => CompleteAsync(job.Id, job.CurrentStage)">Zakończ: @PolishDisplayNames.Stage(job.CurrentStage)</button>
+                    @if (job.CurrentStage == "QaTests")
+                    {
+                        <input placeholder="Opis usterki" @bind="_qaFailureReason" />
+                        <button @onclick="() => FailQaAsync(job.Id)">Kontrola nieudana</button>
+                    }
+                    <button class="link" @onclick="() => CompleteAsync(job.Id, NextStage(job.CurrentStage))" title="Pokazuje regułę R9">Pomiń etap</button>
+                }
+            </article>
+        }
+    </div>
+}
+
+@code {
+    private const int RefreshIntervalMilliseconds = 2000;
+
+    private static readonly string[] Stages = ["Printing", "Assembly", "QaTests", "Packing", "Shipped"];
+
+    private IReadOnlyList<ProductionJobDto>? _jobs;
+    private ApiRequestRejectedException? _error;
+    private string _technician = "Ania";
+    private string _qaFailureReason = "Luźne mocowanie napędu";
+    private Timer? _refreshTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadJobsAsync();
+        _refreshTimer = new Timer(_ => InvokeAsync(RefreshAsync), null, RefreshIntervalMilliseconds, RefreshIntervalMilliseconds);
+    }
+
+    private static string NextStage(string stage) => Stages[Math.Min(Array.IndexOf(Stages, stage) + 1, Stages.Length - 1)];
+
+    private static string StageCssClass(ProductionJobDto job, string stage)
+    {
+        var currentIndex = Array.IndexOf(Stages, job.CurrentStage);
+        var stageIndex = Array.IndexOf(Stages, stage);
+
+        if (job.Status == "Shipped" || stageIndex < currentIndex)
+        {
+            return "done";
+        }
+
+        return stageIndex == currentIndex ? "current" : "";
+    }
+
+    private async Task RefreshAsync()
+    {
+        await LoadJobsAsync();
+        StateHasChanged();
+    }
+
+    private async Task LoadJobsAsync()
+    {
+        try
+        {
+            _jobs = (await Api.IndexProductionJobsAsync(CancellationToken.None)).Items;
+        }
+        catch (ApiRequestRejectedException exception)
+        {
+            _error = exception;
+        }
+    }
+
+    private Task CompleteAsync(Guid jobId, string stage) => RunAsync(() => Api.CompleteStageAsync(jobId, stage, _technician, CancellationToken.None));
+
+    private Task FailQaAsync(Guid jobId) => RunAsync(() => Api.FailQaAsync(jobId, _qaFailureReason, CancellationToken.None));
+
+    private Task ReleaseAsync(Guid jobId) => RunAsync(() => Api.ReleaseFromHoldAsync(jobId, CancellationToken.None));
+
+    private Task ShipAsync(Guid jobId) => RunAsync(() => Api.ShipAsync(jobId, $"RF-{DateTime.UtcNow:yyyyMMddHHmmss}", CancellationToken.None));
+
+    private async Task RunAsync(Func<Task<ProductionJobDto>> apiCall)
+    {
+        _error = null;
+
+        try
+        {
+            await apiCall();
+            await LoadJobsAsync();
+        }
+        catch (ApiRequestRejectedException exception)
+        {
+            _error = exception;
+        }
+    }
+
+    public void Dispose() => _refreshTimer?.Dispose();
+}

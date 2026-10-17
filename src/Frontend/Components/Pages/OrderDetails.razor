@@ -1,0 +1,157 @@
+@page "/orders/{OrderId:guid}"
+@implements IDisposable
+@inject RoboForgeApiHttpClient Api
+
+<PageTitle>Zamówienie – RoboForge</PageTitle>
+
+<h1>Zamówienie</h1>
+
+<ApiErrorAlert Error="_error" />
+
+@if (_order is null)
+{
+    <p>Ładowanie…</p>
+}
+else
+{
+    <p>
+        <span class="badge status-@_order.Status">@PolishDisplayNames.OrderStatus(_order.Status)</span>
+        złożone @PolishDisplayNames.LocalTime(_order.PlacedOnUtc) ·
+        termin <strong>@_order.LeadTimeWorkingDays dni roboczych</strong>
+        @if (_order.TrackingNumber is not null)
+        {
+            <span> · numer przesyłki <strong>@_order.TrackingNumber</strong></span>
+        }
+    </p>
+
+    @if (_order.Status == "Placed")
+    {
+        <div class="actions">
+            <button class="primary" @onclick="ConfirmAsync">Potwierdź (start produkcji)</button>
+            <input placeholder="Powód anulowania" @bind="_cancellationReason" />
+            <button @onclick="CancelAsync">Anuluj</button>
+        </div>
+    }
+    else if (_order.Status is "Confirmed" or "InProduction")
+    {
+        <div class="actions">
+            <input placeholder="Powód anulowania" @bind="_cancellationReason" />
+            <button @onclick="CancelAsync" title="Pokazuje regułę R8">Spróbuj anulować</button>
+        </div>
+    }
+
+    @if (_order.CancellationReason is not null)
+    {
+        <p>Powód anulowania: @_order.CancellationReason</p>
+    }
+
+    <div class="columns">
+        <section>
+            <h2>Postęp produkcji</h2>
+            <ol class="timeline">
+                @foreach (var stage in _order.CompletedStages)
+                {
+                    <li>✔ @PolishDisplayNames.Stage(stage.Stage) <small>@PolishDisplayNames.LocalTime(stage.CompletedOnUtc)</small></li>
+                }
+            </ol>
+            @if (_order.CompletedStages.Count == 0)
+            {
+                <p>Produkcja jeszcze się nie zaczęła.</p>
+            }
+
+            @if (_order.Notes.Count != 0)
+            {
+                <h2>Komunikaty</h2>
+                <ul>
+                    @foreach (var note in _order.Notes)
+                    {
+                        <li>@note.Text <small>@PolishDisplayNames.LocalTime(note.AddedOnUtc)</small></li>
+                    }
+                </ul>
+            }
+        </section>
+
+        <section>
+            <h2>Części (stan z chwili zamówienia)</h2>
+            <ul class="robot-parts">
+                @foreach (var part in _order.Parts)
+                {
+                    <li><span><strong>@PolishDisplayNames.Category(part.Category):</strong> @part.Name</span> <span>@PolishDisplayNames.Price(part.PriceAmount)</span></li>
+                }
+            </ul>
+            <table class="quote">
+                <tr><td>Części</td><td class="number">@PolishDisplayNames.Price(_order.PartsPriceAmount)</td></tr>
+                <tr><td>Montaż</td><td class="number">@PolishDisplayNames.Price(_order.AssemblyPriceAmount)</td></tr>
+                <tr><td>Rabat</td><td class="number">− @PolishDisplayNames.Price(_order.DiscountAmount)</td></tr>
+                <tr class="total"><td>Razem</td><td class="number">@PolishDisplayNames.Price(_order.TotalPriceAmount)</td></tr>
+            </table>
+        </section>
+    </div>
+    <p><small>Strona odświeża się sama co 2 sekundy: status przychodzi z warsztatu przez zdarzenia.</small></p>
+}
+
+@code {
+    private const int RefreshIntervalMilliseconds = 2000;
+
+    [Parameter]
+    public Guid OrderId { get; set; }
+
+    private OrderDto? _order;
+    private ApiRequestRejectedException? _error;
+    private string _cancellationReason = "";
+    private Timer? _refreshTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrderAsync();
+        _refreshTimer = new Timer(_ => InvokeAsync(RefreshAsync), null, RefreshIntervalMilliseconds, RefreshIntervalMilliseconds);
+    }
+
+    private async Task RefreshAsync()
+    {
+        await LoadOrderAsync();
+        StateHasChanged();
+    }
+
+    private async Task LoadOrderAsync()
+    {
+        try
+        {
+            _order = await Api.ShowOrderAsync(OrderId, CancellationToken.None);
+        }
+        catch (ApiRequestRejectedException exception)
+        {
+            _error = exception;
+        }
+    }
+
+    private async Task ConfirmAsync()
+    {
+        _error = null;
+
+        try
+        {
+            _order = await Api.ConfirmOrderAsync(OrderId, CancellationToken.None);
+        }
+        catch (ApiRequestRejectedException exception)
+        {
+            _error = exception;
+        }
+    }
+
+    private async Task CancelAsync()
+    {
+        _error = null;
+
+        try
+        {
+            _order = await Api.CancelOrderAsync(OrderId, _cancellationReason, CancellationToken.None);
+        }
+        catch (ApiRequestRejectedException exception)
+        {
+            _error = exception;
+        }
+    }
+
+    public void Dispose() => _refreshTimer?.Dispose();
+}

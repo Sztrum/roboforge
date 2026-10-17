@@ -1,0 +1,67 @@
+@page "/catalog"
+@inject RoboForgeApiHttpClient Api
+
+<PageTitle>Katalog – RoboForge</PageTitle>
+
+<h1>Katalog części</h1>
+
+<ApiErrorAlert Error="_error" />
+
+@if (_parts is null)
+{
+    <p>Ładowanie…</p>
+}
+else
+{
+    @foreach (var category in _parts.GroupBy(part => part.Category))
+    {
+        <h2>@PolishDisplayNames.Category(category.Key)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nazwa</th>
+                    <th class="number">Cena</th>
+                    <th class="number">Dostawa</th>
+                    <th class="number">Masa</th>
+                    <th>Parametry</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var part in category)
+                {
+                    <tr class="@(part.IsDiscontinued ? "discontinued" : "")">
+                        <td>@part.Name @(part.IsDiscontinued ? "(wycofana)" : "")</td>
+                        <td class="number">@PolishDisplayNames.Price(part.PriceAmount)</td>
+                        <td class="number">@part.LeadTimeWorkingDays dni rob.</td>
+                        <td class="number">@part.WeightGrams g</td>
+                        <td>@TechnicalValues(part)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    private IReadOnlyList<PartDto>? _parts;
+    private ApiRequestRejectedException? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _parts = (await Api.IndexPartsAsync(CancellationToken.None)).Items;
+        }
+        catch (ApiRequestRejectedException exception)
+        {
+            _error = exception;
+        }
+    }
+
+    private static string TechnicalValues(PartDto part) => string.Join(", ", new[]
+    {
+        part.MountType is null ? null : $"mocowanie {part.MountType}",
+        part.VoltageVolts is null ? null : $"{part.VoltageVolts} V",
+        part.MaxLoadGrams is null ? null : $"udźwig {part.MaxLoadGrams} g",
+    }.Where(value => value is not null));
+}

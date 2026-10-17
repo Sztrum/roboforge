@@ -279,6 +279,22 @@ events.
   enum of stages; the contracts carry stage names.
 - **`DemoScenarioTest`** runs the documented demo end to end through the API.
 
+## Frontend (stage 6, 2026-10-17)
+
+- **`src/Frontend`** is a Blazor Web App with interactive server rendering:
+  no WebAssembly download and no CORS, because the browser talks only to the
+  frontend, which calls the API server-side.
+- **It talks to the API over HTTP only** (`RoboForgeApiHttpClient`, its own
+  DTOs) and references no module; an architecture test enforces it. The API
+  address comes from Aspire service discovery (`https+http://webapi`).
+- **Rejected requests** become `ApiRequestRejectedException` with the
+  ProblemDetails message and rule IDs, shown by `ApiErrorAlert`, so the demo
+  shows R1–R10 as the customer would see them.
+- **Order and workshop pages poll every 2 seconds**: production progress
+  arrives asynchronously through the outbox. Push (SignalR) is a later
+  extension.
+- Aspire starts it as the `frontend` resource at http://localhost:5050.
+
 ## References
 
 - Solution template: https://github.com/jasontaylordev/CleanArchitecture

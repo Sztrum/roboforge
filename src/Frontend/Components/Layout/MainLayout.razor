@@ -1,0 +1,23 @@
+@inherits LayoutComponentBase
+
+<div class="page">
+    <header class="topbar">
+        <a class="brand" href="">🤖 RoboForge</a>
+        <nav>
+            <NavLink href="catalog">Katalog</NavLink>
+            <NavLink href="configurator">Konfigurator</NavLink>
+            <NavLink href="orders">Zamówienia</NavLink>
+            <NavLink href="workshop">Warsztat</NavLink>
+        </nav>
+    </header>
+
+    <main>
+        @Body
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    Wystąpił nieoczekiwany błąd.
+    <a href="." class="reload">Odśwież</a>
+    <span class="dismiss">🗙</span>
+</div>

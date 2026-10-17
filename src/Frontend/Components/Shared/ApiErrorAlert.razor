@@ -1,0 +1,17 @@
+@* Shows why the API refused the last request, with the violated business rules. *@
+
+@if (Error is not null)
+{
+    <div class="alert alert-error" role="alert">
+        @if (Error.Rules.Count != 0)
+        {
+            <strong>Naruszone reguły: @string.Join(", ", Error.Rules)</strong>
+        }
+        <div>@Error.Message</div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public ApiRequestRejectedException? Error { get; set; }
+}
