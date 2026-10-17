@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RoboForge.Modules.Sales.Application.Database;
 using RoboForge.Modules.Sales.Domain.Configurations;
+using RoboForge.Modules.Sales.Domain.Orders;
 using RoboForge.Modules.Sales.Domain.Parts;
 using RoboForge.Shared.Infrastructure.Outbox;
 
@@ -14,6 +15,8 @@ public sealed class SalesDbContext(DbContextOptions<SalesDbContext> options) : D
     public DbSet<OfferedPartAggregate> OfferedParts => Set<OfferedPartAggregate>();
 
     public DbSet<RobotConfigurationAggregate> RobotConfigurations => Set<RobotConfigurationAggregate>();
+
+    public DbSet<OrderAggregate> Orders => Set<OrderAggregate>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

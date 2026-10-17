@@ -243,6 +243,21 @@ events.
   until then the API answers 404. The functional-test fixture waits until
   Sales offers the 12 starter parts before tests run.
 
+## Sales orders (stage 4, 2026-10-17)
+
+- **An order is placed from a configuration** (`OrderAggregate.Place`): the
+  configuration validates itself and becomes `Ordered` (S1), and the order
+  copies its part snapshots, price breakdown and lead time. Both aggregates
+  change in one transaction because they belong to the same module.
+- **Confirming starts production**, so R8 allows cancelling only a placed
+  order. `OrderStatusEnum` has no `Draft`: a draft is a configuration.
+- **Sales publishes** `OrderConfirmedIntegrationEvent` (with the parts the
+  workshop needs) and `OrderCancelledIntegrationEvent` through its own
+  outbox. The cancellation is "e-mailed" by a log entry, as the MVP scope
+  says.
+- **Production progress reaches the order only through events** (stage 5):
+  completed stages, failed QA (a note and +3 working days, S6) and shipping.
+
 ## References
 
 - Solution template: https://github.com/jasontaylordev/CleanArchitecture
