@@ -162,6 +162,7 @@ Mechanics:
 | PUT | `/api/parts/{id}/price` | change price |
 | POST | `/api/parts/{id}/discontinue` | discontinue a part |
 | POST | `/api/configurations` | new empty configuration |
+| GET | `/api/configurations/{id}` | show a configuration |
 | POST | `/api/configurations/{id}/parts` | add a part to a configuration |
 | DELETE | `/api/configurations/{id}/parts/{partId}` | remove a part |
 | GET | `/api/configurations/{id}/quote` | validation + price + lead time |

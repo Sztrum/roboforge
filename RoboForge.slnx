@@ -14,7 +14,11 @@
     <Project Path="src/Web/Web.csproj" />
   </Folder>
   <Folder Name="/src/Modules/Sales/">
+    <Project Path="src/Modules/Sales/Sales.Application/Sales.Application.csproj" />
     <Project Path="src/Modules/Sales/Sales.Domain/Sales.Domain.csproj" />
+    <Project Path="src/Modules/Sales/Sales.Infrastructure/Sales.Infrastructure.csproj" />
+    <Project Path="src/Modules/Sales/Sales.IntegrationEvents/Sales.IntegrationEvents.csproj" />
+    <Project Path="src/Modules/Sales/Sales.UI/Sales.UI.csproj" />
   </Folder>
   <Folder Name="/src/Shared/">
     <Project Path="src/Shared/Shared.Application/Shared.Application.csproj" />
