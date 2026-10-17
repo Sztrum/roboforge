@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using RoboForge.Modules.Catalog.Domain.Parts.Enums;
 using RoboForge.Modules.Catalog.Domain.Parts.Events;
 using RoboForge.Modules.Catalog.Domain.Parts.Exceptions;
@@ -21,6 +22,17 @@ public sealed class PartAggregate : AggregateRoot<PartId>
         Price = price;
         LeadTime = leadTime;
         TechSpec = techSpec;
+    }
+
+    [SuppressMessage("Major Code Smell", "S1144:Unused private types or members should be removed",
+        Justification = "EF Core calls it through reflection when loading a part, then sets the value objects.")]
+    private PartAggregate(PartId id, string name)
+        : base(id)
+    {
+        Name = name;
+        Price = null!;
+        LeadTime = null!;
+        TechSpec = null!;
     }
 
     public string Name { get; private set; }
