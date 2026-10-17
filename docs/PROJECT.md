@@ -85,14 +85,20 @@ Numbers are examples and may be changed (record the change here).
 | R9 | Production stages run strictly in order, no skipping. | `ProductionJobAggregate.CompleteStage()` |
 | R10 | Failed QA sends the job back to Assembly; after 2 failures the job is on hold pending a decision. | `ProductionJobAggregate.FailQa()` |
 
-Value objects guard their own invariants with `M…` (money) and similar
-rule IDs, returned the same way as R-rules:
+Value objects and aggregates guard their own invariants with `M…` (money), `L…` (lead time),
+`C…` (catalog) and similar rule IDs, returned the same way as R-rules:
 
 | # | Rule | Lives in |
 | --- | --- | --- |
 | M1 | An amount of money cannot be negative. | `Money` |
 | M2 | Amounts are kept in whole grosze: rounded to 2 decimal places, halves away from zero (10.005 → 10.01). | `Money` |
 | M3 | Only amounts in the same currency can be added. | `Money` |
+| L1 | A lead time is at least 1 working day. | `LeadTime` |
+| C1 | A part's name must not be empty. | `PartAggregate.Create()` |
+| C2 | Technical values (weight, voltage, max load) must be positive. | `TechSpec` |
+| C3 | A part has the technical values its category needs for R2–R4: housing → mount type; drive → mount type, voltage, max load; electronics → voltage. | `PartAggregate.Create()` |
+| C4 | A discontinued part cannot be repriced. | `PartAggregate.ChangePrice()` |
+| C5 | A part can be discontinued only once. | `PartAggregate.Discontinue()` |
 
 R2–R4 span several parts, so they live in the `RobotPartsCompatibilityPolicy` domain
 service, which returns a list of violations instead of throwing on the first

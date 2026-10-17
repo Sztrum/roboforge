@@ -31,6 +31,10 @@
     <Project Path="tests/TestAppHost/TestAppHost.csproj" />
     <Project Path="tests/Web.FunctionalTests/Web.FunctionalTests.csproj" />
   </Folder>
+  <Folder Name="/tests/Modules/" />
+  <Folder Name="/tests/Modules/Catalog/">
+    <Project Path="tests/Modules/Catalog/Catalog.Domain.UnitTests/Catalog.Domain.UnitTests.csproj" />
+  </Folder>
   <Folder Name="/tests/Shared/">
     <Project Path="tests/Shared/Shared.Application.UnitTests/Shared.Application.UnitTests.csproj" />
     <Project Path="tests/Shared/Shared.Domain.UnitTests/Shared.Domain.UnitTests.csproj" />
