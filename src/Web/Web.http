@@ -1,12 +1,88 @@
-# For more info on HTTP files go to https://aka.ms/vs/httpfile
-@Web_HostAddress = https://localhost:7151
+# Requests for the RoboForge API, runnable from Rider, Visual Studio or VS Code (REST Client).
+# Start the app first: dotnet run --project src/AppHost --launch-profile http
+@Web_HostAddress = http://localhost:5040
 
-# GET health (Development only)
+# Health (Development only)
 GET {{Web_HostAddress}}/health
 
 ###
 
-# GET OpenAPI document
+# OpenAPI document
 GET {{Web_HostAddress}}/openapi/v1.json
+
+###
+
+### ---------- Catalog ----------
+
+# List all parts
+GET {{Web_HostAddress}}/api/parts
+
+###
+
+# List one category: Housing, Drive, Electronics or Sensor
+GET {{Web_HostAddress}}/api/parts?category=Drive
+
+###
+
+# Add a part (price in PLN)
+# @name storePart
+POST {{Web_HostAddress}}/api/parts
+Content-Type: application/json
+
+{
+  "name": "Czujnik linii IR",
+  "category": "Sensor",
+  "priceAmount": 34.90,
+  "leadTimeWorkingDays": 2,
+  "weightGrams": 10
+}
+
+###
+
+@partId = {{storePart.response.body.$.id}}
+
+# Show the new part
+GET {{Web_HostAddress}}/api/parts/{{partId}}
+
+###
+
+# Change its price
+PUT {{Web_HostAddress}}/api/parts/{{partId}}/price
+Content-Type: application/json
+
+{
+  "priceAmount": 29.90
+}
+
+###
+
+# Discontinue it (final)
+POST {{Web_HostAddress}}/api/parts/{{partId}}/discontinue
+
+###
+
+# Repricing a discontinued part → 422 with rule C4
+PUT {{Web_HostAddress}}/api/parts/{{partId}}/price
+Content-Type: application/json
+
+{
+  "priceAmount": 19.90
+}
+
+###
+
+# A drive without a mount type → 422 with rule C3
+POST {{Web_HostAddress}}/api/parts
+Content-Type: application/json
+
+{
+  "name": "Napęd bez mocowania",
+  "category": "Drive",
+  "priceAmount": 120,
+  "leadTimeWorkingDays": 3,
+  "weightGrams": 300,
+  "voltageVolts": 12,
+  "maxLoadGrams": 1500
+}
 
 ###

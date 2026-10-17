@@ -1,3 +1,4 @@
+using RoboForge.Modules.Catalog.Domain.Parts;
 using RoboForge.Modules.Catalog.Domain.Parts.Enums;
 
 namespace RoboForge.Modules.Catalog.Application.Parts.Resources;
@@ -14,4 +15,18 @@ public sealed record PartResource(
     MountTypeEnum? MountType,
     int? VoltageVolts,
     int? MaxLoadGrams,
-    bool IsDiscontinued);
+    bool IsDiscontinued)
+{
+    public static PartResource FromAggregate(PartAggregate part) => new(
+        part.Id.Value,
+        part.Name,
+        part.Category,
+        part.Price.Amount,
+        part.Price.Currency,
+        part.LeadTime.WorkingDays,
+        part.TechSpec.WeightGrams,
+        part.TechSpec.MountType,
+        part.TechSpec.VoltageVolts,
+        part.TechSpec.MaxLoadGrams,
+        part.IsDiscontinued);
+}
