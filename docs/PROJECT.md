@@ -116,6 +116,8 @@ the same transaction as the state change.
 | `ProductionStageCompletedEvent` | Production | Sales | `OrderAggregate.MarkStageReached(stage)`, status `InProduction` |
 | `QaFailedEvent` | Production | Sales | order note, new lead time |
 | `RobotShippedEvent` | Production | Sales | status `Shipped`, tracking number |
+| `PartCreatedEvent` | Catalog | Sales | adds the part to Sales' copy of the offer (source of `PartSnapshot`) |
+| `PartPriceChangedEvent` | Catalog | Sales | updates the price in Sales' copy of the offer; placed orders keep their snapshot |
 | `PartDiscontinuedEvent` | Catalog | Sales | marks draft configurations with this part as invalid |
 
 Mechanics:
