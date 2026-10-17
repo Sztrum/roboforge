@@ -158,6 +158,30 @@ with `Command`/`Query`/`Handler`. The full table lives in the agent rules
 - `DomainException` is abstract: every business rule gets its own exception
   type named after the situation.
 
+## Catalog persistence (stage 2, 2026-10-17)
+
+- **Handlers use the module's DbContext through an interface** in the
+  Application layer (`ICatalogDbContext`: `DbSet`s + `SaveChangesAsync`), as
+  in the template. No repositories: EF Core already is one, and the rules
+  forbid speculative abstractions. Application may reference EF Core; the
+  architecture tests still keep Npgsql and ASP.NET Core out of it.
+- **Value objects are EF Core complex properties** (`Money`, `LeadTime`,
+  `TechSpec`), so they become columns of the aggregate's table
+  (`Price_Amount`, `TechSpec_MountType`, …). Strongly typed IDs use value
+  converters; enums are stored as their names.
+- **Aggregates have a second private constructor for EF Core**, because EF
+  cannot pass complex properties to a constructor. Sonar's S1144 is
+  suppressed on it with a justification.
+- **Seed data goes through the domain** (`PartAggregate.Create`) from EF
+  Core's `UseAsyncSeeding`, which runs after the migrations on start-up and
+  only fills an empty catalog. Functional tests therefore see the same 12
+  parts as the demo.
+- **Migrations** live in `{Module}.Infrastructure/Database/Migrations`;
+  `dotnet-ef` is a local tool (`dotnet-tools.json`, `dotnet tool restore`).
+- **JSON enums are names** (`"Drive"`), configured once in the API host.
+- **OpenAPI tags** drop the `Api` prefix and `EndpointGroup` suffix of the
+  endpoint-group class (`ApiPartEndpointGroup` → `Part`).
+
 ## References
 
 - Solution template: https://github.com/jasontaylordev/CleanArchitecture

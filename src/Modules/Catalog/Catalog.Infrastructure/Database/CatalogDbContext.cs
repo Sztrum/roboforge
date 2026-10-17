@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using RoboForge.Modules.Catalog.Application.Database;
+using RoboForge.Modules.Catalog.Domain.Parts;
 
 namespace RoboForge.Modules.Catalog.Infrastructure.Database;
 
@@ -6,9 +8,11 @@ namespace RoboForge.Modules.Catalog.Infrastructure.Database;
 /// The Catalog module's own database context. Its tables live in the <c>catalog</c> schema,
 /// so no other module shares them.
 /// </summary>
-public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options) : DbContext(options)
+public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options) : DbContext(options), ICatalogDbContext
 {
     public const string Schema = "catalog";
+
+    public DbSet<PartAggregate> Parts => Set<PartAggregate>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
