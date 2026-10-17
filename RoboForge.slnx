@@ -13,6 +13,9 @@
     <Project Path="src/ServiceDefaults/ServiceDefaults.csproj" />
     <Project Path="src/Web/Web.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Sales/">
+    <Project Path="src/Modules/Sales/Sales.Domain/Sales.Domain.csproj" />
+  </Folder>
   <Folder Name="/src/Shared/">
     <Project Path="src/Shared/Shared.Application/Shared.Application.csproj" />
     <Project Path="src/Shared/Shared.Domain/Shared.Domain.csproj" />
@@ -37,6 +40,9 @@
   <Folder Name="/tests/Modules/" />
   <Folder Name="/tests/Modules/Catalog/">
     <Project Path="tests/Modules/Catalog/Catalog.Domain.UnitTests/Catalog.Domain.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Modules/Sales/">
+    <Project Path="tests/Modules/Sales/Sales.Domain.UnitTests/Sales.Domain.UnitTests.csproj" />
   </Folder>
   <Folder Name="/tests/Shared/">
     <Project Path="tests/Shared/Shared.Application.UnitTests/Shared.Application.UnitTests.csproj" />
